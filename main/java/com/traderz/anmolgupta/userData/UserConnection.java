@@ -1,6 +1,8 @@
 package com.traderz.anmolgupta.userData;
 
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBAttribute;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBHashKey;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMarshalling;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBTable;
 
 /**
@@ -9,6 +11,7 @@ import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBTable;
 @DynamoDBTable(tableName = "UserConnection")
 public class UserConnection {
     private String email;
+    private EmailMappingToFullName connections;
 
     @DynamoDBHashKey(attributeName = "Email")
     public String getEmail() {
@@ -19,5 +22,16 @@ public class UserConnection {
     public void setEmail( String email ) {
 
         this.email = email;
+    }
+
+    @DynamoDBAttribute(attributeName = "Connections")
+    @DynamoDBMarshalling(marshallerClass = EmailMappingToFullNameConverter.class)
+    public EmailMappingToFullName getContacts() {
+
+        return connections;
+    }
+
+    public void setContacts(EmailMappingToFullName emailMappingToFullName) {
+        this.connections = emailMappingToFullName;
     }
 }
