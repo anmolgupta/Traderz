@@ -186,9 +186,7 @@ public class UserData {
 //    }
 //
 //    @DynamoDBRangeKey(attributeName = "Email")
-
     public UserData(String email) {
-
         this.email = email;
     }
 

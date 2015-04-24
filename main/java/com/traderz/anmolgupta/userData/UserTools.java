@@ -9,6 +9,7 @@ import com.traderz.anmolgupta.utilities.DynamoDBTools;
 public class UserTools {
 
     Context _context;
+    DynamoDBMapper mapper;
 
     private UserTools(Context context) {
 
@@ -20,18 +21,18 @@ public class UserTools {
         return new UserTools(context);
     }
 
-    public UserData isDuplicateUser(UserData newUser) {
+    public UserData isDuplicateUser(String email) {
 
         try {
             DynamoDBMapper mapper =
                     DynamoDBTools.getInstance(_context).getDynamoDBMapper();
 
-            UserData userData = mapper.load(UserData.class, newUser.getEmail());
+            UserData userData = mapper.load(UserData.class, email);
 
             return userData;
 
         }catch(Exception e) {
-
+            e.printStackTrace();
         }
         return null;
     }
@@ -39,7 +40,7 @@ public class UserTools {
     public UserContacts isUserContactsPresent(String email) {
 
         try {
-            DynamoDBMapper mapper =
+            mapper =
                     DynamoDBTools.getInstance(_context).getDynamoDBMapper();
 
             UserContacts userData = mapper.load(UserContacts.class, email);
@@ -55,7 +56,7 @@ public class UserTools {
     public void saveUserData(UserData userData) {
 
         try {
-            DynamoDBMapper mapper =
+            mapper =
                     DynamoDBTools.getInstance(_context).getDynamoDBMapper();
 
             mapper.save(userData);

@@ -262,7 +262,7 @@ public class SocialAuth extends ActionBarActivity {
                 UserTools.getInstance(SocialAuth.this);
 
         UserData userData =
-                userTools.isDuplicateUser(new UserData(email));
+                userTools.isDuplicateUser( email );
 
         if(userData == null) {
 
@@ -296,9 +296,6 @@ public class SocialAuth extends ActionBarActivity {
                 userContacts.getContacts().add(t.getContactInfo());
                 userTools.saveObject(userContacts);
             }
-
-
-
         }
     }
 }
