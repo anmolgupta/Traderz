@@ -1,28 +1,30 @@
 package com.traderz.anmolgupta.traderz;
 
 import android.content.Intent;
-import android.os.StrictMode;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
+import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
 import com.traderz.anmolgupta.userData.EmailMappingToFullName;
 import com.traderz.anmolgupta.userData.Social;
 import com.traderz.anmolgupta.userData.UserContacts;
 import com.traderz.anmolgupta.userData.UserData;
-import com.traderz.anmolgupta.userData.UserDataTest;
-import com.traderz.anmolgupta.userData.UserDataTestTools;
-import com.traderz.anmolgupta.userData.UserTools;
 
 import org.brickred.socialauth.Profile;
 import org.brickred.socialauth.android.DialogListener;
 import org.brickred.socialauth.android.SocialAuthAdapter;
 import org.brickred.socialauth.android.SocialAuthError;
 import org.brickred.socialauth.android.SocialAuthListener;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class SocialAuth extends ActionBarActivity {
 
@@ -41,10 +43,10 @@ public class SocialAuth extends ActionBarActivity {
 
         adapter = new SocialAuthAdapter(new ResponseListener());
 
-        if ( android.os.Build.VERSION.SDK_INT > 9 ) {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-        }
+//        if ( android.os.Build.VERSION.SDK_INT > 9 ) {
+//            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+//            StrictMode.setThreadPolicy(policy);
+//        }
 
         //Facebook
 
@@ -127,52 +129,6 @@ public class SocialAuth extends ActionBarActivity {
                 }
             }
         });
-
-        Button saveButton = (Button)findViewById(R.id.save);
-
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick( View v ) {
-
-                UserDataTest userDataTest = new UserDataTest();
-                userDataTest.setEmail("anmol@gmail.com");
-                userDataTest.setCustom("abc");
-                userDataTest.setCustom1("xyz");
-                UserDataTestTools userTools = UserDataTestTools.getInstance(SocialAuth.this);
-
-                userTools.save(userDataTest);
-            }
-        });
-
-        Button loadButton = (Button)findViewById(R.id.load);
-
-        loadButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick( View v ) {
-
-                UserDataTest userDataTest = new UserDataTest();
-                userDataTest.setEmail("anmol.gupta91@gmail.com");
-
-                UserDataTestTools userTools = UserDataTestTools.getInstance(SocialAuth.this);
-
-                userTools.load(userDataTest);
-            }
-        });
-
-        Button deleteButton = (Button)findViewById(R.id.delete);
-
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick( View v ) {
-
-                UserDataTest userDataTest = new UserDataTest();
-                userDataTest.setEmail("anmol.gupta91@gmail.com");
-
-                UserDataTestTools userTools = UserDataTestTools.getInstance(SocialAuth.this);
-
-                userTools.delete(userDataTest);
-            }
-        });
     }
 
     @Override
@@ -207,15 +163,19 @@ public class SocialAuth extends ActionBarActivity {
         @Override
         public void onError( SocialAuthError socialAuthError ) {
 
+            //TODO:: navigate to other activity
+
         }
 
         @Override
         public void onCancel() {
+            //TODO:: navigate to other activity
 
         }
 
         @Override
         public void onBack() {
+            //TODO:: navigate to other activity
 
         }
     }
@@ -226,7 +186,7 @@ public class SocialAuth extends ActionBarActivity {
         @Override
         public void onExecute( String s, Profile t ) {
 
-            checkIfPresentInDatabase(t);
+            new SaveUserInfo().execute(t);
         }
 
         @Override
@@ -240,62 +200,104 @@ public class SocialAuth extends ActionBarActivity {
         this.adapter = adapter;
     }
 
-    public void checkIfPresentInDatabase(Profile t) {
+    class MappingTask extends AsyncTask<Void, Void, Void> {
 
-        String email = t.getEmail();
-        String socialId = t.getValidatedId();
-        String firstName = t.getFirstName();
-        String lastName = t.getLastName();
-        String gender = t.getGender();
-        String country = t.getCountry();
-        String location = t.getLocation();
-        String language = t.getLanguage();
-        String imageURL = t.getProfileImageURL();
-        String dob = t.getDob().toString();
+        @Override
+        protected Void doInBackground( Void... params ) {
 
-        if(email == null || email.equals("")) {
-            //dosomething
-            return;
+            Map<String, String> map = new HashMap<String,String>();
+            map.put("one", "1");
+            map.put("two", "2");
+
+            EmailMappingToFullName emailMappingToFullName =
+                    new EmailMappingToFullName(map);
+
+            UserContacts userContacts = new UserContacts("anmol");
+            userContacts.setContacts(emailMappingToFullName);
+
+            DynamoDBManager.saveObject(userContacts);
+            return null;
+        }
+    }
+    class SaveUserInfo extends AsyncTask<Profile, Void, String> {
+
+        protected String doInBackground(Profile... profiles) {
+
+                Profile t = profiles[0];
+
+                String email = t.getEmail();
+                String socialId = t.getValidatedId();
+                String firstName = t.getFirstName();
+                String lastName = t.getLastName();
+                String gender = t.getGender();
+                String country = t.getCountry();
+                String location = t.getLocation();
+                String language = t.getLanguage();
+                String imageURL = t.getProfileImageURL();
+                String dob = t.getDob().toString();
+
+                if(email == null || email.equals("")) {
+                    return null;
+                }
+
+                UserData userData =
+                        DynamoDBManager.loadObject(new UserData(email));
+
+                if(userData == null) {
+
+                    userData = new UserData(
+                            email, country, dob, firstName,
+                            lastName, language, imageURL,
+                            gender, location, socialId, social);
+
+                } else {
+
+                    userData.setSocialId(social, socialId);
+                }
+
+                DynamoDBManager.saveObject(userData);
+
+                if(t.getContactInfo() != null) {
+
+                    UserContacts userContacts =
+                            DynamoDBManager.loadObject(new UserContacts(email));
+
+                    if( userContacts == null ) {
+
+                        userContacts = new UserContacts();
+
+                        userContacts.setEmail(email);
+                        userContacts.setContacts(new EmailMappingToFullName(t.getContactInfo()));
+
+                        DynamoDBManager.saveObject(userContacts);
+
+                    } else{
+                        //Add new information if any to user data
+                        userContacts.getContacts().add(t.getContactInfo());
+                        DynamoDBManager.saveObject(userContacts);
+                    }
+                }
+
+            return email;
         }
 
-        UserTools userTools =
-                UserTools.getInstance(SocialAuth.this);
+        protected void onPostExecute(String email) {
 
-        UserData userData =
-                userTools.isDuplicateUser( email );
-
-        if(userData == null) {
-
-            userData = new UserData(
-                    email, country, dob, firstName,
-                    lastName, language, imageURL,
-                    gender, location, socialId, social);
-
-        } else {
-
-            userData.setSocialId(social, socialId);
-        }
-
-        userTools.saveUserData(userData);
-
-        if(t.getContactInfo() != null) {
-
-            UserContacts userContacts = userTools.isUserContactsPresent(email);
-
-            if( userContacts == null ) {
-
-                userContacts = new UserContacts();
-
-                userContacts.setEmail(email);
-                userContacts.setContacts(new EmailMappingToFullName(t.getContactInfo()));
-
-                userTools.saveUserContact(userContacts);
-
-            } else{
-                //Add new information if any to user data
-                userContacts.getContacts().add(t.getContactInfo());
-                userTools.saveObject(userContacts);
+            if(email == null){
+                Toast.makeText(SocialAuth.this, "msg msg", Toast.LENGTH_LONG).show();
+                return;
             }
+
+            //TODO:: navigate to other activity
+            SharedPreferences settings = getSharedPreferences("Traderz", 0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("email", email);
+            editor.commit();
+
+            Intent intent = new Intent(SocialAuth.this, MainAdminNavigation.class);
+            intent.putExtra("email", email);
+            startActivity(intent);
         }
+
     }
 }

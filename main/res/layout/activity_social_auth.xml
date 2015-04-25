@@ -48,33 +48,4 @@
         android:layout_below="@+id/google_plus_social_auth"
         android:layout_centerHorizontal="true"/>
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="save"
-        android:id="@+id/save"
-        android:layout_below="@+id/twitter_social_auth"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"/>
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="load"
-        android:id="@+id/load"
-        android:layout_below="@+id/save"
-        android:layout_alignRight="@+id/facebook_social_auth"
-        android:layout_alignEnd="@+id/facebook_social_auth"/>
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="delete"
-        android:id="@+id/delete"
-        android:layout_below="@+id/load"
-        android:layout_centerHorizontal="true"/>
-
 </RelativeLayout>
