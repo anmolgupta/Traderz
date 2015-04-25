@@ -39,4 +39,13 @@ public class UserContacts {
     public void setContacts(EmailMappingToFullName emailMappingToFullName) {
         this.contacts = emailMappingToFullName;
     }
+
+    public UserContacts() {
+
+    }
+
+    public UserContacts(String email) {
+
+        this.email = email;
+    }
 }
