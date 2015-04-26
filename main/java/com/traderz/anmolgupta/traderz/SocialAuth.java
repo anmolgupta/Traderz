@@ -284,11 +284,10 @@ public class SocialAuth extends ActionBarActivity {
         protected void onPostExecute(String email) {
 
             if(email == null){
-                Toast.makeText(SocialAuth.this, "msg msg", Toast.LENGTH_LONG).show();
+                Toast.makeText(SocialAuth.this, "Please try again", Toast.LENGTH_LONG).show();
                 return;
             }
 
-            //TODO:: navigate to other activity
             SharedPreferences settings = getSharedPreferences("Traderz", 0);
             SharedPreferences.Editor editor = settings.edit();
             editor.putString("email", email);

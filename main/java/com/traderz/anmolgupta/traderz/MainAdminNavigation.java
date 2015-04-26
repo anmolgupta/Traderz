@@ -64,7 +64,7 @@ public class MainAdminNavigation extends ActionBarActivity
     }
 
     public void onSectionAttached( int number ) {
-
+        //TODO:: to be modified
         switch ( number ) {
             case 1:
                 mTitle = getString(R.string.title_section1);

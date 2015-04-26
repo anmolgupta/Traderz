@@ -37,11 +37,12 @@
             android:label="@string/title_activity_settings" >
         </activity>
         <activity
-            android:name=".MainAdminNavigation1"
-            android:label="@string/title_activity_main_admin_navigation" >
-        </activity>
-        <activity
             android:name=".SocialAuth"
+            android:label="@string/title_activity_social_auth" >
+        </activity>
+
+        <activity
+            android:name=".MainActivity"
             android:label="@string/title_activity_social_auth" >
         </activity>
     </application>

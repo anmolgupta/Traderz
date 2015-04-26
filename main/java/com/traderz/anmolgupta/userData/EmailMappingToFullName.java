@@ -1,5 +1,7 @@
 package com.traderz.anmolgupta.userData;
 
+import com.amazonaws.com.google.gson.annotations.SerializedName;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,6 +10,7 @@ import java.util.Map;
  */
 public class EmailMappingToFullName{
 
+    @SerializedName("Contacts")
     Map<String, String> map  = new HashMap<String, String>();
 
     public EmailMappingToFullName() {
