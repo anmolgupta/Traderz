@@ -2,10 +2,12 @@ package com.traderz.anmolgupta.traderz;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBar;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,6 +15,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
+import android.widget.ArrayAdapter;
+
+import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
+import com.traderz.anmolgupta.userData.UserContacts;
+
+import java.util.ArrayList;
 
 
 public class MainAdminNavigation extends ActionBarActivity
@@ -27,6 +35,7 @@ public class MainAdminNavigation extends ActionBarActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+    private String _email;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -42,6 +51,11 @@ public class MainAdminNavigation extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        SharedPreferences settings = getSharedPreferences("Traderz", 0);
+        _email = settings.getString("email", "");
+
+        new GetConnectionTask().execute();
     }
 
 
@@ -58,10 +72,29 @@ public class MainAdminNavigation extends ActionBarActivity
     public void onNavigationDrawerItemSelected( int position ) {
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
+
         fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                .replace(R.id.container, getFragment(3))
                 .commit();
     }
+
+    public Fragment getFragment( int position ) {
+
+            Fragment fragment = null;
+            Bundle args = new Bundle();
+            switch (position) {
+                case 3:
+                    fragment = new AddConnection1();
+                    args.putString(AddConnection1.TITLE, "anmol");
+                    break;
+                default: break;
+            }
+
+            fragment.setArguments(args);
+
+            return fragment;
+    }
+
 
     public void onSectionAttached( int number ) {
         //TODO:: to be modified
@@ -163,5 +196,29 @@ public class MainAdminNavigation extends ActionBarActivity
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
 
+    }
+
+    class GetConnectionTask extends AsyncTask<Void, Void, UserContacts> {
+
+        @Override
+        protected UserContacts doInBackground( Void... params ) {
+
+            UserContacts userContacts =
+                    DynamoDBManager.loadObject(new UserContacts(_email));
+
+            return userContacts;
+        }
+
+        @Override
+        protected void onPostExecute(UserContacts userContacts) {
+
+            if(userContacts != null) {
+
+                ArrayList<String> contacts = new ArrayList<String>(userContacts.getContacts().getMap().values());
+
+                mNavigationDrawerFragment.setContent(contacts.toArray(new String[contacts.size()]));
+
+            }
+        }
     }
 }

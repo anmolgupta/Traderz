@@ -33,6 +33,7 @@ public class FragmentTwo   extends Fragment {
 		tvItemName.setText(getArguments().getString(ITEM_NAME));
 		ivIcon.setImageDrawable(view.getResources().getDrawable(
 				getArguments().getInt(IMAGE_RESOURCE_ID)));
+
 		return view;
 	}
 

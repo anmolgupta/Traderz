@@ -2,15 +2,17 @@ package com.traderz.anmolgupta.userData;
 
 import com.amazonaws.com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+import java.io.SerializablePermission;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Created by anmolgupta on 22/04/15.
  */
-public class EmailMappingToFullName{
+public class EmailMappingToFullName implements Serializable {
 
-    @SerializedName("Contacts")
+//    @SerializedName("Contacts")
     Map<String, String> map  = new HashMap<String, String>();
 
     public EmailMappingToFullName() {

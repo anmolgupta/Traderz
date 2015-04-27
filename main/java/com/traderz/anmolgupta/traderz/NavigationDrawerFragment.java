@@ -1,5 +1,6 @@
 package com.traderz.anmolgupta.traderz;
 
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;
 import android.support.v7.app.ActionBar;
@@ -21,6 +22,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
+import com.traderz.anmolgupta.userData.UserContacts;
+import com.traderz.anmolgupta.userData.UserData;
+
+import java.util.ArrayList;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -57,16 +64,28 @@ public class NavigationDrawerFragment extends Fragment {
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
-
+    private String[] options;
     public NavigationDrawerFragment() {
 
     }
+    public void setContent(String args[] ) {
 
+        options = args;
+        mDrawerListView.setAdapter(new ArrayAdapter<String>(
+                getActionBar().getThemedContext(),
+                android.R.layout.simple_list_item_activated_1,
+                android.R.id.text1,
+                options));
+    }
     @Override
     public void onCreate( Bundle savedInstanceState ) {
 
         super.onCreate(savedInstanceState);
 
+        options = new String[]{getString(R.string.title_section1),
+                getString(R.string.title_section2),
+                getString(R.string.title_section3),
+                "Add Connection"};
         // Read in the flag indicating whether or not the user has demonstrated awareness of the
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -79,6 +98,8 @@ public class NavigationDrawerFragment extends Fragment {
 
         // Select either the default item (0) or the last selected item.
         selectItem(mCurrentSelectedPosition);
+
+//        new GetConnectionTask().execute();
     }
 
     @Override
@@ -102,16 +123,12 @@ public class NavigationDrawerFragment extends Fragment {
                 selectItem(position);
             }
         });
+
         mDrawerListView.setAdapter(new ArrayAdapter<String>(
                 getActionBar().getThemedContext(),
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
-                new String[]{
-                        getString(R.string.title_section1),
-                        getString(R.string.title_section2),
-                        getString(R.string.title_section3),
-                        "Add Connection"
-                }));
+                options));
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         return mDrawerListView;
     }
@@ -298,5 +315,33 @@ public class NavigationDrawerFragment extends Fragment {
          * Called when an item in the navigation drawer is selected.
          */
         void onNavigationDrawerItemSelected( int position );
+    }
+
+    class GetConnectionTask extends AsyncTask<Void, Void, UserContacts> {
+
+        @Override
+        protected UserContacts doInBackground( Void... params ) {
+
+            UserContacts userContacts =
+                    DynamoDBManager.loadObject(new UserContacts("anmol"));
+
+            return userContacts;
+        }
+
+        @Override
+        protected void onPostExecute(UserContacts userContacts) {
+
+            if(userContacts != null) {
+
+                ArrayList<String> contacts = new ArrayList<String>(userContacts.getContacts().getMap().values());
+
+                options = contacts.toArray(new String[contacts.size()]);
+                mDrawerListView.setAdapter(new ArrayAdapter<String>(
+                        getActionBar().getThemedContext(),
+                        android.R.layout.simple_list_item_activated_1,
+                        android.R.id.text1,
+                        options));
+            }
+        }
     }
 }

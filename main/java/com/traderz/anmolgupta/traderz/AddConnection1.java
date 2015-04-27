@@ -3,7 +3,7 @@ package com.traderz.anmolgupta.traderz;
 import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,15 +19,12 @@ import android.widget.TextView;
  */
 public class AddConnection1 extends Fragment {
 
+    public static final String TITLE = "title";
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-		/* Retrieving the currently selected item number */
-        String title = "Add Connection";
-
         /* Updating the action bar title */
-        getActivity().getActionBar().setTitle(title);
+//        getActivity().getActionBar().setTitle(title);
 
         /* Getting the WebView target url */
 //        String url = getArguments().getString("url");
@@ -36,7 +33,9 @@ public class AddConnection1 extends Fragment {
         View v = inflater.inflate(R.layout.activity_add_connection, container, false);
 
 		/* Initializing and loading url in WebView */
-        TextView conenctionUsername = (TextView) v.findViewById(R.id.connectionUserName);
+        TextView connectionUsername = (TextView) v.findViewById(R.id.connectionUserName);
+        connectionUsername.setText(getArguments().getString(TITLE, ""));
+
         Button connectionButton = (Button) v.findViewById(R.id.connectionButton);
 
         connectionButton.setOnClickListener(new View.OnClickListener() {
