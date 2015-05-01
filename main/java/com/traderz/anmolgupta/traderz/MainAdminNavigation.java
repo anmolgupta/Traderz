@@ -73,13 +73,13 @@ public class MainAdminNavigation extends ActionBarActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
 
         fragmentManager.beginTransaction()
-                .replace(R.id.container, getFragment(position))
+                .replace(R.id.container, getFragment(2))
                 .commit();
     }
 
     public Fragment getFragment( int position ) {
 
-            mTitle = mNavigationDrawerFragment.getTitle(position);
+//            mTitle = mNavigationDrawerFragment.getTitle(position);
 
             Fragment fragment = null;
             Bundle args = new Bundle();
