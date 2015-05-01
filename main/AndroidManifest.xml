@@ -29,10 +29,6 @@
             android:label="@string/title_activity_main_admin_navigation" >
         </activity>
         <activity
-            android:name=".AddConnection"
-            android:label="@string/title_activity_add_connection" >
-        </activity>
-        <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
@@ -45,6 +41,13 @@
             android:name=".MainActivity"
             android:label="@string/title_activity_social_auth" >
         </activity>
+
+        <activity
+            android:name=".AddRowActivity">
+        </activity>
+
+
+
     </application>
 
 </manifest>

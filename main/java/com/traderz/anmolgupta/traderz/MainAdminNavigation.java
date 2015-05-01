@@ -15,7 +15,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
 
 import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
 import com.traderz.anmolgupta.userData.UserContacts;
@@ -74,18 +73,21 @@ public class MainAdminNavigation extends ActionBarActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
 
         fragmentManager.beginTransaction()
-                .replace(R.id.container, getFragment(3))
+                .replace(R.id.container, getFragment(position))
                 .commit();
     }
 
     public Fragment getFragment( int position ) {
 
+            mTitle = mNavigationDrawerFragment.getTitle(position);
+
             Fragment fragment = null;
             Bundle args = new Bundle();
+
             switch (position) {
-                case 3:
-                    fragment = new AddConnection1();
-                    args.putString(AddConnection1.TITLE, "anmol");
+                case 2:
+                    fragment = new AddConnection();
+                    args.putString(AddConnection.TITLE, "anmol");
                     break;
                 default: break;
             }
@@ -216,7 +218,7 @@ public class MainAdminNavigation extends ActionBarActivity
 
                 ArrayList<String> contacts = new ArrayList<String>(userContacts.getContacts().getMap().values());
 
-                mNavigationDrawerFragment.setContent(contacts.toArray(new String[contacts.size()]));
+                mNavigationDrawerFragment.setContent(contacts);
 
             }
         }

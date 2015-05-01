@@ -28,6 +28,8 @@ import com.traderz.anmolgupta.userData.UserContacts;
 import com.traderz.anmolgupta.userData.UserData;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -64,28 +66,31 @@ public class NavigationDrawerFragment extends Fragment {
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
-    private String[] options;
+    private List<String> options;
     public NavigationDrawerFragment() {
 
     }
-    public void setContent(String args[] ) {
+    public void setContent(List<String> args ) {
 
-        options = args;
+        options.addAll(args);
         mDrawerListView.setAdapter(new ArrayAdapter<String>(
                 getActionBar().getThemedContext(),
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
                 options));
+
     }
     @Override
     public void onCreate( Bundle savedInstanceState ) {
 
         super.onCreate(savedInstanceState);
 
-        options = new String[]{getString(R.string.title_section1),
-                getString(R.string.title_section2),
-                getString(R.string.title_section3),
+        String [] initial = new String[]{"My View",
+                "Add Row",
                 "Add Connection"};
+
+        options = Arrays.asList(initial);
+
         // Read in the flag indicating whether or not the user has demonstrated awareness of the
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -131,6 +136,11 @@ public class NavigationDrawerFragment extends Fragment {
                 options));
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         return mDrawerListView;
+    }
+
+    public String getTitle(int position){
+
+        return options.get(position);
     }
 
     public boolean isDrawerOpen() {
@@ -333,14 +343,10 @@ public class NavigationDrawerFragment extends Fragment {
 
             if(userContacts != null) {
 
-                ArrayList<String> contacts = new ArrayList<String>(userContacts.getContacts().getMap().values());
+                ArrayList<String> contacts = new ArrayList<String>(
+                        userContacts.getContacts().getMap().values());
 
-                options = contacts.toArray(new String[contacts.size()]);
-                mDrawerListView.setAdapter(new ArrayAdapter<String>(
-                        getActionBar().getThemedContext(),
-                        android.R.layout.simple_list_item_activated_1,
-                        android.R.id.text1,
-                        options));
+                setContent(contacts);
             }
         }
     }
