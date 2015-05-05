@@ -15,15 +15,21 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
+import android.widget.ArrayAdapter;
 
 import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
+import com.traderz.anmolgupta.userData.UserConnection;
 import com.traderz.anmolgupta.userData.UserContacts;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class MainAdminNavigation extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks,
+        ViewTable.ViewTableCallbacks {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -54,7 +60,7 @@ public class MainAdminNavigation extends ActionBarActivity
         SharedPreferences settings = getSharedPreferences("Traderz", 0);
         _email = settings.getString("email", "");
 
-        new GetConnectionTask().execute();
+        new GetConnectionTask().execute(_email);
     }
 
 
@@ -70,26 +76,34 @@ public class MainAdminNavigation extends ActionBarActivity
     @Override
     public void onNavigationDrawerItemSelected( int position ) {
         // update the main content by replacing fragments
+        setFragment(getFragment(2));
+    }
+
+    public void setFragment(Fragment fragment) {
+
         FragmentManager fragmentManager = getSupportFragmentManager();
 
         fragmentManager.beginTransaction()
-                .replace(R.id.container, getFragment(2))
+                .replace(R.id.container, fragment)
                 .commit();
+
     }
 
     public Fragment getFragment( int position ) {
-
-//            mTitle = mNavigationDrawerFragment.getTitle(position);
 
             Fragment fragment = null;
             Bundle args = new Bundle();
 
             switch (position) {
-                case 2:
-                    fragment = new AddConnection();
-                    args.putString(AddConnection.TITLE, "anmol");
+                case 0:
+                    fragment = new ViewTable();
+                    args.putString(ViewTable.TITLE, "anmol");
+                    args.putString(ViewTable.ID, "anmol007gupta@gmail.com");
+
                     break;
-                default: break;
+                default:
+                    fragment = new AddConnection();
+                    break;
             }
 
             fragment.setArguments(args);
@@ -154,6 +168,29 @@ public class MainAdminNavigation extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onViewTableCallbacks( String id, HashMap<String,String> map) {
+
+        Bundle args = new Bundle();
+        args.putString(ViewTable.TITLE, id);
+        args.putSerializable("abc",  map);
+
+        Fragment fragment = new AddConnection();
+        fragment.setArguments(args);
+
+        setFragment(fragment);
+
+
+    }
+
+    @Override
+    public void onAddRowInTableCallbacks() {
+
+        Fragment fragment = new AddRowActivity();
+        setFragment(fragment);
+
+    }
+
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -200,25 +237,34 @@ public class MainAdminNavigation extends ActionBarActivity
 
     }
 
-    class GetConnectionTask extends AsyncTask<Void, Void, UserContacts> {
+    class GetConnectionTask extends AsyncTask<String, Void, UserConnection> {
 
         @Override
-        protected UserContacts doInBackground( Void... params ) {
+        protected UserConnection doInBackground( String... params ) {
 
-            UserContacts userContacts =
-                    DynamoDBManager.loadObject(new UserContacts(_email));
+            UserConnection userConnection =
+                    DynamoDBManager.loadObject(new UserConnection(params[0]));
 
-            return userContacts;
+            return userConnection;
         }
 
         @Override
-        protected void onPostExecute(UserContacts userContacts) {
+        protected void onPostExecute(UserConnection userConnection) {
 
-            if(userContacts != null) {
+            if(userConnection != null) {
 
-                ArrayList<String> contacts = new ArrayList<String>(userContacts.getContacts().getMap().values());
+                ArrayList<String> contacts = new ArrayList<String>(
+                        userConnection.getContacts().getMap().values());
 
-                mNavigationDrawerFragment.setContent(contacts);
+                List<String> options = mNavigationDrawerFragment.getOptions();
+                options.addAll(contacts);
+
+                mNavigationDrawerFragment.getMDrawerListView().
+                        setAdapter(new ArrayAdapter<String>(
+                        getActionBar().getThemedContext(),
+                        android.R.layout.simple_list_item_activated_1,
+                        android.R.id.text1,
+                        options));
 
             }
         }

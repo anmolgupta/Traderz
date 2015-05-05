@@ -34,4 +34,18 @@ public class UserConnection {
     public void setContacts(EmailMappingToFullName emailMappingToFullName) {
         this.connections = emailMappingToFullName;
     }
+
+    public UserConnection() {
+
+
+    }
+    public UserConnection(String email, EmailMappingToFullName emailMappingToFullName) {
+
+        setEmail(email);
+        setContacts(emailMappingToFullName);
+    }
+
+    public UserConnection(String email) {
+        setEmail(email);
+    }
 }

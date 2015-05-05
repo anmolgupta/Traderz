@@ -1,6 +1,8 @@
 package com.traderz.anmolgupta.DynamoDB;
 
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBQueryExpression;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedQueryList;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.traderz.anmolgupta.Content.UserContent;
 import com.traderz.anmolgupta.Content.Visibility;
@@ -49,6 +51,23 @@ public class DynamoDBManager {
             e.printStackTrace();
         }
 
+        return null;
+    }
+
+    public static <T> PaginatedQueryList<T> getQueryResult(Class<T> Clazz, DynamoDBQueryExpression query ) {
+
+        try{
+
+            DynamoDBMapper mapper =
+                    StartingActivity.amazonClientManager.getDynamoDBMapper();
+
+            PaginatedQueryList<T> returnObj = mapper.query(Clazz, query);
+
+            return returnObj;
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

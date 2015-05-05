@@ -17,7 +17,6 @@ import java.util.Set;
  * Created by anmolgupta on 29/04/15.
  */
 @DynamoDBTable(tableName = "UserContent")
-
 public class UserContent {
 
     private String id;
@@ -121,6 +120,7 @@ public class UserContent {
 
         setTimestamp(timestamp);
         setUpdatedTimestamp(timestamp);
+        setVisibility(Visibility.PUBLIC);
 
     }
 

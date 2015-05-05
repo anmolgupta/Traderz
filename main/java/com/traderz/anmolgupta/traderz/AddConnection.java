@@ -19,7 +19,6 @@ import android.widget.TextView;
  */
 public class AddConnection extends Fragment {
 
-    public static final String TITLE = "title";
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -34,7 +33,6 @@ public class AddConnection extends Fragment {
 
 		/* Initializing and loading url in WebView */
         TextView connectionUsername = (TextView) v.findViewById(R.id.connectionUserName);
-        connectionUsername.setText(getArguments().getString(TITLE, ""));
 
         Button connectionButton = (Button) v.findViewById(R.id.connectionButton);
 

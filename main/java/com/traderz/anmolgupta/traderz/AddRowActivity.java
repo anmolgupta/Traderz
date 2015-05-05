@@ -1,6 +1,7 @@
 package com.traderz.anmolgupta.traderz;
 
 import android.app.Activity;
+import android.support.v4.app.Fragment;
 import android.app.ListActivity;
 import android.content.Context;
 import android.os.Bundle;
@@ -22,7 +23,7 @@ import java.util.Map;
 /**
  * Created by anmolgupta on 27/04/15.
  */
-public class AddRowActivity extends ListActivity {
+public class AddRowActivity extends Fragment {
 
     List<KeyValue> columnEntity;
     int customColumnCount;
@@ -30,10 +31,10 @@ public class AddRowActivity extends ListActivity {
     ListView listView;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate( Bundle savedInstanceState ) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_row);
+//        setContentView(R.layout.activity_add_row);
 
         customColumnCount = 1;
 
@@ -46,13 +47,31 @@ public class AddRowActivity extends ListActivity {
 
         definedColumnNumber = columnEntity.size();
 
-        TextView textView = (TextView)findViewById(R.id.tv1);
+    }
 
-        Button addRowButton = (Button)findViewById(R.id.tv1);
+    void setAdapter() {
 
-//        listView = (ListView)findViewById(android.R.id.list);
+        listView.setAdapter(new MyAdapter(getActivity(),
+                        android.R.layout.simple_list_item_1,
+                        columnEntity));
+    }
 
-        addRowButton.setOnClickListener(new View.OnClickListener() {
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        /* Updating the action bar title */
+//        getActivity().getActionBar().setTitle(title);
+
+        /* Getting the WebView target url */
+//        String url = getArguments().getString("url");
+
+		/* Creating view corresponding to the fragment */
+         listView = (ListView) inflater.inflate(R.layout.activity_add_row,
+                container, false);
+
+        Button button = (Button)listView.findViewById(R.id.tv1);
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick( View v ) {
 
@@ -65,17 +84,9 @@ public class AddRowActivity extends ListActivity {
             }
         });
 
-        setAdapter();
+        return listView;
     }
 
-    void setAdapter() {
-
-//        listView.
-                setListAdapter(new MyAdapter(this,
-                android.R.layout.simple_list_item_1,
-                android.R.id.text1,
-                columnEntity));
-    }
 
     KeyValue getKeyValue(String key){
 
@@ -155,20 +166,20 @@ public class AddRowActivity extends ListActivity {
 
     class MyAdapter extends ArrayAdapter<KeyValue> {
 
+        LayoutInflater inflater;
         public MyAdapter( Context context, int resource,
-                          int textViewResourceId, List<KeyValue> objects ) {
+                          List<KeyValue> objects ) {
 
-            super(context, resource, textViewResourceId, objects);
+            super(context, resource, objects);
             // TODO Auto-generated constructor stub
-//            content= objects;
+            inflater = (LayoutInflater)context.
+                    getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         @Override
         public View getView( final int position, View convertView,
                              ViewGroup parent ) {
 
-            LayoutInflater inflater = (LayoutInflater) getSystemService(
-                    Context.LAYOUT_INFLATER_SERVICE);
 
             View row = inflater.inflate(R.layout.fragment_add_row, parent, false);
 

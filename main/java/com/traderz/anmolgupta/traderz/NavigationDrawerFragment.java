@@ -23,11 +23,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
-import com.traderz.anmolgupta.userData.UserContacts;
-import com.traderz.anmolgupta.userData.UserData;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -67,12 +62,14 @@ public class NavigationDrawerFragment extends Fragment {
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
     private List<String> options;
+
     public NavigationDrawerFragment() {
 
     }
-    public void setContent(List<String> args ) {
 
-        options.addAll(args);
+    public void setOptions(List<String> list){
+
+        options.addAll(list);
         mDrawerListView.setAdapter(new ArrayAdapter<String>(
                 getActionBar().getThemedContext(),
                 android.R.layout.simple_list_item_activated_1,
@@ -80,14 +77,23 @@ public class NavigationDrawerFragment extends Fragment {
                 options));
 
     }
+
+    public List<String> getOptions() {
+        return options;
+    }
+
+    public ListView getMDrawerListView() {
+
+        return mDrawerListView;
+    }
+
     @Override
     public void onCreate( Bundle savedInstanceState ) {
 
         super.onCreate(savedInstanceState);
 
-        String [] initial = new String[]{"My View",
-                "Add Row",
-                "Add Connection"};
+        String [] initial = new String[]{"Add Connection",
+                "My View"};
 
         options = Arrays.asList(initial);
 
@@ -327,27 +333,37 @@ public class NavigationDrawerFragment extends Fragment {
         void onNavigationDrawerItemSelected( int position );
     }
 
-    class GetConnectionTask extends AsyncTask<Void, Void, UserContacts> {
-
-        @Override
-        protected UserContacts doInBackground( Void... params ) {
-
-            UserContacts userContacts =
-                    DynamoDBManager.loadObject(new UserContacts("anmol"));
-
-            return userContacts;
-        }
-
-        @Override
-        protected void onPostExecute(UserContacts userContacts) {
-
-            if(userContacts != null) {
-
-                ArrayList<String> contacts = new ArrayList<String>(
-                        userContacts.getContacts().getMap().values());
-
-                setContent(contacts);
-            }
-        }
-    }
+//    class GetConnectionTask extends AsyncTask<Void, Void, UserConnection> {
+//
+//        @Override
+//        protected UserConnection doInBackground( Void... params ) {
+//
+//
+//
+//            UserConnection userConnection =
+//                    DynamoDBManager.loadObject(new UserConnection(email));
+//
+//            return userConnection;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(UserConnection userContacts) {
+//
+//            if(userContacts != null) {
+//
+//                ArrayList<String> contacts = new ArrayList<String>(
+//                        userContacts.getContacts().getMap().values());
+//
+//                List<String> array = new ArrayList<>(options);
+//                array.addAll(userContacts.getContacts().getMap().values());
+//                mDrawerListView.setAdapter(new ArrayAdapter<String>(
+//                getActionBar().getThemedContext(),
+//                android.R.layout.simple_list_item_activated_1,
+//                android.R.id.text1,
+//                array));
+//
+//                options = array;
+//            }
+//        }
+//    }
 }
