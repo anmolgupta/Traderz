@@ -17,7 +17,7 @@ import android.widget.TextView;
  * Activities that contain this fragment must implement the
  * create an instance of this fragment.
  */
-public class AddConnection extends Fragment {
+public class  AddConnection extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

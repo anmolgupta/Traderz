@@ -60,7 +60,7 @@ public class MainAdminNavigation extends ActionBarActivity
         SharedPreferences settings = getSharedPreferences("Traderz", 0);
         _email = settings.getString("email", "");
 
-        new GetConnectionTask().execute(_email);
+//        new GetConnectionTask().execute(_email);
     }
 
 
@@ -76,7 +76,7 @@ public class MainAdminNavigation extends ActionBarActivity
     @Override
     public void onNavigationDrawerItemSelected( int position ) {
         // update the main content by replacing fragments
-        setFragment(getFragment(2));
+        setFragment(getFragment(position));
     }
 
     public void setFragment(Fragment fragment) {
@@ -96,7 +96,7 @@ public class MainAdminNavigation extends ActionBarActivity
 
             switch (position) {
                 case 0:
-                    fragment = new ViewTable();
+                    fragment = new AddConnection();
                     args.putString(ViewTable.TITLE, "anmol");
                     args.putString(ViewTable.ID, "anmol007gupta@gmail.com");
 
@@ -253,18 +253,10 @@ public class MainAdminNavigation extends ActionBarActivity
 
             if(userConnection != null) {
 
-                ArrayList<String> contacts = new ArrayList<String>(
+                List<String> contacts = new ArrayList<String>(
                         userConnection.getContacts().getMap().values());
 
-                List<String> options = mNavigationDrawerFragment.getOptions();
-                options.addAll(contacts);
-
-                mNavigationDrawerFragment.getMDrawerListView().
-                        setAdapter(new ArrayAdapter<String>(
-                        getActionBar().getThemedContext(),
-                        android.R.layout.simple_list_item_activated_1,
-                        android.R.id.text1,
-                        options));
+//                mNavigationDrawerFragment.setOptions(contacts);
 
             }
         }

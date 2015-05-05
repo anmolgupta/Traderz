@@ -23,6 +23,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
+import com.traderz.anmolgupta.userData.UserConnection;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -62,29 +66,25 @@ public class NavigationDrawerFragment extends Fragment {
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
     private List<String> options;
+    private List<String> dummy;
 
     public NavigationDrawerFragment() {
 
     }
 
-    public void setOptions(List<String> list){
+    public void setOptions(List<String> contacts) {
 
-        options.addAll(list);
+        ArrayList<String> dummy = new ArrayList<>();
+        dummy.addAll(options);
+        dummy.addAll(contacts);
+
         mDrawerListView.setAdapter(new ArrayAdapter<String>(
                 getActionBar().getThemedContext(),
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
-                options));
+                dummy));
 
-    }
-
-    public List<String> getOptions() {
-        return options;
-    }
-
-    public ListView getMDrawerListView() {
-
-        return mDrawerListView;
+        options = dummy;
     }
 
     @Override
@@ -96,7 +96,7 @@ public class NavigationDrawerFragment extends Fragment {
                 "My View"};
 
         options = Arrays.asList(initial);
-
+        dummy = Arrays.asList(initial);
         // Read in the flag indicating whether or not the user has demonstrated awareness of the
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -110,7 +110,8 @@ public class NavigationDrawerFragment extends Fragment {
         // Select either the default item (0) or the last selected item.
         selectItem(mCurrentSelectedPosition);
 
-//        new GetConnectionTask().execute();
+        dummy = new ArrayList<String>();
+        new GetConnectionTask().execute("anmol007gupta@gmail.com");
     }
 
     @Override
@@ -333,37 +334,27 @@ public class NavigationDrawerFragment extends Fragment {
         void onNavigationDrawerItemSelected( int position );
     }
 
-//    class GetConnectionTask extends AsyncTask<Void, Void, UserConnection> {
-//
-//        @Override
-//        protected UserConnection doInBackground( Void... params ) {
-//
-//
-//
-//            UserConnection userConnection =
-//                    DynamoDBManager.loadObject(new UserConnection(email));
-//
-//            return userConnection;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(UserConnection userContacts) {
-//
-//            if(userContacts != null) {
-//
-//                ArrayList<String> contacts = new ArrayList<String>(
-//                        userContacts.getContacts().getMap().values());
-//
-//                List<String> array = new ArrayList<>(options);
-//                array.addAll(userContacts.getContacts().getMap().values());
-//                mDrawerListView.setAdapter(new ArrayAdapter<String>(
-//                getActionBar().getThemedContext(),
-//                android.R.layout.simple_list_item_activated_1,
-//                android.R.id.text1,
-//                array));
-//
-//                options = array;
-//            }
-//        }
-//    }
+    class GetConnectionTask extends AsyncTask<String, Void, UserConnection> {
+
+        @Override
+        protected UserConnection doInBackground( String... params ) {
+
+            UserConnection userConnection =
+                    DynamoDBManager.loadObject(new UserConnection(params[0]));
+
+            return userConnection;
+        }
+
+        @Override
+        protected void onPostExecute(UserConnection userConnection) {
+
+            if(userConnection != null) {
+
+                List<String> contacts = new ArrayList<String>(
+                        userConnection.getContacts().getMap().values());
+
+                setOptions(contacts);
+            }
+        }
+    }
 }
