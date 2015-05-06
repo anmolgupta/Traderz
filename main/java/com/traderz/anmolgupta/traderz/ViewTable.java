@@ -19,7 +19,9 @@ import android.widget.TextView;
 
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBQueryExpression;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBScanExpression;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedQueryList;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedScanList;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
 import com.amazonaws.services.dynamodbv2.model.Condition;
@@ -70,18 +72,21 @@ public class ViewTable extends Fragment {
 //        String url = getArguments().getString("url");
 
 		/* Creating view corresponding to the fragment */
-        ListView listView = (ListView)inflater.inflate(R.layout.activity_view_table,
+        View view = inflater.inflate(R.layout.activity_view_table,
                 container, false);
 
         //TODO:: Get the list of CustomFields from UserContent
         List<CustomFields> customFields  = new ArrayList<CustomFields>();
+
+        ListView listView = (ListView)view.findViewById(android.R.id.list);
 
         listView.setAdapter(new MyAdapter(getActivity(),
                 android.R.layout.simple_list_item_1,
                 customFields));
 		/* Initializing and loading url in WebView */
 
-        Button addRow = (Button) listView.findViewById(R.id.add_row);
+        Button addRow = (Button)view.findViewById(R.id.add_row);
+
             addRow.setOnClickListener(new View.OnClickListener(){
 
                 @Override
@@ -90,7 +95,7 @@ public class ViewTable extends Fragment {
                 }
         });
 
-        return listView;
+        return view;
     }
 
     class MyAdapter extends ArrayAdapter<CustomFields>{
@@ -159,18 +164,20 @@ public class ViewTable extends Fragment {
 
             Condition rangeKeyCondition = new Condition()
                     .withComparisonOperator(ComparisonOperator.LT.toString())
-                    .withAttributeValueList(new AttributeValue().withN("" + timestamp));
+                    .withAttributeValueList(new AttributeValue().withS("" + timestamp));
 
             DynamoDBQueryExpression queryExpression = new DynamoDBQueryExpression()
                     .withHashKeyValues(userContent)
-                    .withRangeKeyCondition("Timestamp", rangeKeyCondition)
+                    .withRangeKeyCondition("UpdatedTimestamp", rangeKeyCondition)
                     .withConsistentRead(false);
 
-            PaginatedQueryList<UserContent> result =
-                    DynamoDBManager.getQueryResult(UserContent.class, queryExpression);
+//            PaginatedQueryList<UserContent> result =
+//                    DynamoDBManager.getQueryResult(UserContent.class, queryExpression);
 
+            PaginatedScanList<UserContent> result1 =
+                    DynamoDBManager.getScanResult(UserContent.class, new DynamoDBScanExpression());
 
-            return result;
+            return null;
         }
 
         @Override

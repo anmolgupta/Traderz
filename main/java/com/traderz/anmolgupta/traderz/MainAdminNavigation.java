@@ -96,7 +96,7 @@ public class MainAdminNavigation extends ActionBarActivity
 
             switch (position) {
                 case 0:
-                    fragment = new AddConnection();
+                    fragment = new ViewTable();
                     args.putString(ViewTable.TITLE, "anmol");
                     args.putString(ViewTable.ID, "anmol007gupta@gmail.com");
 
