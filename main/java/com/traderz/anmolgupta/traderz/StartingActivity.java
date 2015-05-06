@@ -25,7 +25,7 @@ public class StartingActivity extends Activity {
         if(userId.equals("")) {
             startActivity(new Intent(StartingActivity.this, SocialAuth.class));
         } else {
-            Intent intent = new Intent(StartingActivity.this, MainAdminNavigation.class);
+            Intent intent = new Intent(StartingActivity.this, LoadingDataTest.class);
             intent.putExtra("email", userId);
             startActivity(intent);
         }

@@ -43,11 +43,6 @@ public class SocialAuth extends ActionBarActivity {
 
         adapter = new SocialAuthAdapter(new ResponseListener());
 
-//        if ( android.os.Build.VERSION.SDK_INT > 9 ) {
-//            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-//            StrictMode.setThreadPolicy(policy);
-//        }
-
         //Facebook
 
         Button facebookButton = (Button) findViewById(R.id.facebook_social_auth);
@@ -186,11 +181,17 @@ public class SocialAuth extends ActionBarActivity {
         @Override
         public void onExecute( String s, Profile t ) {
 
-            new SaveUserInfo().execute(t);
+            if(t != null)
+                new SaveUserInfo().execute(t);
+
+            //TODO:: DO something
+
         }
 
         @Override
         public void onError( SocialAuthError socialAuthError ) {
+
+            //TODO:: Do something
 
         }
     }
@@ -200,25 +201,6 @@ public class SocialAuth extends ActionBarActivity {
         this.adapter = adapter;
     }
 
-    class MappingTask extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground( Void... params ) {
-
-            Map<String, String> map = new HashMap<String,String>();
-            map.put("one", "1");
-            map.put("two", "2");
-
-            EmailMappingToFullName emailMappingToFullName =
-                    new EmailMappingToFullName(map);
-
-            UserContacts userContacts = new UserContacts("anmol");
-            userContacts.setContacts(emailMappingToFullName);
-
-            DynamoDBManager.saveObject(userContacts);
-            return null;
-        }
-    }
     class SaveUserInfo extends AsyncTask<Profile, Void, String> {
 
         protected String doInBackground(Profile... profiles) {
@@ -284,11 +266,10 @@ public class SocialAuth extends ActionBarActivity {
         protected void onPostExecute(String email) {
 
             if(email == null){
-                Toast.makeText(SocialAuth.this, "msg msg", Toast.LENGTH_LONG).show();
+                Toast.makeText(SocialAuth.this, "Please try again", Toast.LENGTH_LONG).show();
                 return;
             }
 
-            //TODO:: navigate to other activity
             SharedPreferences settings = getSharedPreferences("Traderz", 0);
             SharedPreferences.Editor editor = settings.edit();
             editor.putString("email", email);

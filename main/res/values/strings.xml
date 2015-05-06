@@ -33,9 +33,12 @@
         <item>Servlets</item>
     </string-array>
 
-    <string name="drawer_open">Open navigation drawer</string>
-    <string name="drawer_close">Close navigation drawer</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_social_auth">SocialAuth</string>
+    <string name="drawer_open">Open drawer</string>
+    <string name="drawer_close">Close drawer</string>
+    <string name="mineral1_prompt">Select Mineral</string>
+    <string name="title_activity_view_table">ViewTable</string>
+    <string name="title_activity_loading_data_test">LoadingDataTest</string>
 
 </resources>

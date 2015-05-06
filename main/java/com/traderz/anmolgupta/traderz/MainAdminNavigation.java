@@ -2,10 +2,12 @@ package com.traderz.anmolgupta.traderz;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBar;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,10 +15,21 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
+import android.widget.ArrayAdapter;
+
+import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
+import com.traderz.anmolgupta.userData.UserConnection;
+import com.traderz.anmolgupta.userData.UserContacts;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class MainAdminNavigation extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks,
+        ViewTable.ViewTableCallbacks {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -27,6 +40,7 @@ public class MainAdminNavigation extends ActionBarActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+    private String _email;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -42,6 +56,11 @@ public class MainAdminNavigation extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        SharedPreferences settings = getSharedPreferences("Traderz", 0);
+        _email = settings.getString("email", "");
+
+//        new GetConnectionTask().execute(_email);
     }
 
 
@@ -57,14 +76,44 @@ public class MainAdminNavigation extends ActionBarActivity
     @Override
     public void onNavigationDrawerItemSelected( int position ) {
         // update the main content by replacing fragments
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                .commit();
+        setFragment(getFragment(position));
     }
 
-    public void onSectionAttached( int number ) {
+    public void setFragment(Fragment fragment) {
 
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, fragment)
+                .commit();
+
+    }
+
+    public Fragment getFragment( int position ) {
+
+            Fragment fragment = null;
+            Bundle args = new Bundle();
+
+            switch (position) {
+                case 0:
+                    fragment = new ViewTable();
+                    args.putString(ViewTable.TITLE, "anmol");
+                    args.putString(ViewTable.ID, "anmol007gupta@gmail.com");
+
+                    break;
+                default:
+                    fragment = new AddConnection();
+                    break;
+            }
+
+            fragment.setArguments(args);
+
+            return fragment;
+    }
+
+
+    public void onSectionAttached( int number ) {
+        //TODO:: to be modified
         switch ( number ) {
             case 1:
                 mTitle = getString(R.string.title_section1);
@@ -119,6 +168,29 @@ public class MainAdminNavigation extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onViewTableCallbacks( String id, HashMap<String,String> map) {
+
+        Bundle args = new Bundle();
+        args.putString(ViewTable.TITLE, id);
+        args.putSerializable("abc",  map);
+
+        Fragment fragment = new AddRowActivity();
+        fragment.setArguments(args);
+
+        setFragment(fragment);
+
+
+    }
+
+    @Override
+    public void onAddRowInTableCallbacks() {
+
+        Fragment fragment = new AddRowActivity();
+        setFragment(fragment);
+
+    }
+
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -163,5 +235,30 @@ public class MainAdminNavigation extends ActionBarActivity
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
 
+    }
+
+    class GetConnectionTask extends AsyncTask<String, Void, UserConnection> {
+
+        @Override
+        protected UserConnection doInBackground( String... params ) {
+
+            UserConnection userConnection =
+                    DynamoDBManager.loadObject(new UserConnection(params[0]));
+
+            return userConnection;
+        }
+
+        @Override
+        protected void onPostExecute(UserConnection userConnection) {
+
+            if(userConnection != null) {
+
+                List<String> contacts = new ArrayList<String>(
+                        userConnection.getContacts().getMap().values());
+
+//                mNavigationDrawerFragment.setOptions(contacts);
+
+            }
+        }
     }
 }

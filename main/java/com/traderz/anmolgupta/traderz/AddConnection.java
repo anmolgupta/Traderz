@@ -1,56 +1,48 @@
 package com.traderz.anmolgupta.traderz;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.support.v7.app.ActionBarActivity;
+import android.net.Uri;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
 
-public class AddConnection extends Activity {
+/**
+ * A simple {@link Fragment} subclass.
+ * Activities that contain this fragment must implement the
+ * create an instance of this fragment.
+ */
+public class  AddConnection extends Fragment {
 
     @Override
-    protected void onCreate( Bundle savedInstanceState ) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        /* Updating the action bar title */
+//        getActivity().getActionBar().setTitle(title);
 
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_connection);
+        /* Getting the WebView target url */
+//        String url = getArguments().getString("url");
 
-        TextView conenctionUsername = (TextView) findViewById(R.id.connectionUserName);
-        Button connectionButton = (Button) findViewById(R.id.connectionButton);
+		/* Creating view corresponding to the fragment */
+        View v = inflater.inflate(R.layout.activity_add_connection, container, false);
+
+		/* Initializing and loading url in WebView */
+        TextView connectionUsername = (TextView) v.findViewById(R.id.connectionUserName);
+
+        Button connectionButton = (Button) v.findViewById(R.id.connectionButton);
 
         connectionButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick( View v ) {
-
+                Log.d("add Connection1", "anmol");
             }
         });
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu( Menu menu ) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_add_connection, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected( MenuItem item ) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if ( id == R.id.action_settings ) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        return v;
     }
 }
