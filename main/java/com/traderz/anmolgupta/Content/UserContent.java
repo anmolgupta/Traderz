@@ -72,7 +72,7 @@ public class UserContent {
         this.timestamp = timestamp;
     }
 
-    @DynamoDBIndexRangeKey(attributeName = "UpdatedTimestamp")
+    @DynamoDBIndexRangeKey(attributeName = "UpdatedTimestamp",localSecondaryIndexName="UpdatedTimestamp-index")
     public Long getUpdatedTimestamp() {
 
         return updatedTimestamp;
@@ -95,7 +95,7 @@ public class UserContent {
         this.customFields = customFields;
     }
 
-    @DynamoDBIndexRangeKey(attributeName = "Visibility")
+    @DynamoDBIndexRangeKey(attributeName = "Visibility",localSecondaryIndexName="Visibility-index")
     @DynamoDBMarshalling(marshallerClass = EnumMarshaller.class)
     public Visibility getVisibility(){
 

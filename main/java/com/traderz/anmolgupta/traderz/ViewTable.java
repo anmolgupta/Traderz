@@ -25,6 +25,7 @@ import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedScanLis
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
 import com.amazonaws.services.dynamodbv2.model.Condition;
+import com.amazonaws.services.dynamodbv2.model.QueryResult;
 import com.traderz.anmolgupta.Content.CustomFields;
 import com.traderz.anmolgupta.Content.UserContent;
 import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
@@ -164,20 +165,21 @@ public class ViewTable extends Fragment {
 
             Condition rangeKeyCondition = new Condition()
                     .withComparisonOperator(ComparisonOperator.LT.toString())
-                    .withAttributeValueList(new AttributeValue().withS("" + timestamp));
+                    .withAttributeValueList(new AttributeValue().withN("" + timestamp));
 
             DynamoDBQueryExpression queryExpression = new DynamoDBQueryExpression()
                     .withHashKeyValues(userContent)
                     .withRangeKeyCondition("UpdatedTimestamp", rangeKeyCondition)
                     .withConsistentRead(false);
+//                    .withIndexName("UpdatedTimestamp-index");
 
-//            PaginatedQueryList<UserContent> result =
-//                    DynamoDBManager.getQueryResult(UserContent.class, queryExpression);
+            PaginatedQueryList<UserContent> result =
+                    DynamoDBManager.getQueryResult(UserContent.class, queryExpression);
 
-            PaginatedScanList<UserContent> result1 =
-                    DynamoDBManager.getScanResult(UserContent.class, new DynamoDBScanExpression());
+//            PaginatedScanList<UserContent> result1 =
+//                    DynamoDBManager.getScanResult(UserContent.class, new DynamoDBScanExpression());
 
-            return null;
+            return result;
         }
 
         @Override
