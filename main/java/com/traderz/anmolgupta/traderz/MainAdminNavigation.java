@@ -175,7 +175,7 @@ public class MainAdminNavigation extends ActionBarActivity
         args.putString(ViewTable.TITLE, id);
         args.putSerializable("abc",  map);
 
-        Fragment fragment = new AddConnection();
+        Fragment fragment = new AddRowActivity();
         fragment.setArguments(args);
 
         setFragment(fragment);

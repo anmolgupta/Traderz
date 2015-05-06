@@ -67,10 +67,12 @@ public class AddRowActivity extends Fragment {
 //        String url = getArguments().getString("url");
 
 		/* Creating view corresponding to the fragment */
-         listView = (ListView) inflater.inflate(R.layout.activity_add_row,
+         View view = inflater.inflate(R.layout.activity_add_row,
                 container, false);
 
-        Button button = (Button)listView.findViewById(R.id.tv1);
+        listView = (ListView)view.findViewById(android.R.id.list);
+
+        Button button = (Button)view.findViewById(R.id.tv1);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick( View v ) {
@@ -84,7 +86,8 @@ public class AddRowActivity extends Fragment {
             }
         });
 
-        return listView;
+        setAdapter();
+        return view;
     }
 
 

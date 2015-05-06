@@ -14,6 +14,7 @@ public class UserKey {
 
     String email;
     Long timestamp;
+    String id;
 
     @DynamoDBHashKey(attributeName = "Email")
     public String getEmail() {
@@ -26,7 +27,7 @@ public class UserKey {
         this.email = email;
     }
 
-    @DynamoDBIndexRangeKey(attributeName = "Timestamp")
+    @DynamoDBIndexRangeKey(attributeName = "Timestamp",localSecondaryIndexName="Timestamp-index")
     public Long getTimestamp() {
 
         return timestamp;
@@ -49,5 +50,4 @@ public class UserKey {
         this.id = id;
     }
 
-    String id;
 }
