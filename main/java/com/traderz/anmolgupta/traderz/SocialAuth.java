@@ -11,11 +11,18 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBQueryExpression;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedQueryList;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
+import com.amazonaws.services.dynamodbv2.model.Condition;
+import com.traderz.anmolgupta.Content.UserContent;
 import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
 import com.traderz.anmolgupta.userData.EmailMappingToFullName;
 import com.traderz.anmolgupta.userData.Social;
 import com.traderz.anmolgupta.userData.UserContacts;
 import com.traderz.anmolgupta.userData.UserData;
+import com.traderz.anmolgupta.userData.UserKey;
 
 import org.brickred.socialauth.Profile;
 import org.brickred.socialauth.android.DialogListener;
@@ -23,6 +30,7 @@ import org.brickred.socialauth.android.SocialAuthAdapter;
 import org.brickred.socialauth.android.SocialAuthError;
 import org.brickred.socialauth.android.SocialAuthListener;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -216,11 +224,16 @@ public class SocialAuth extends ActionBarActivity {
                 String location = t.getLocation();
                 String language = t.getLanguage();
                 String imageURL = t.getProfileImageURL();
-                String dob = t.getDob().toString();
+
+                String dob =null;
+                if(t.getDob() != null)
+                     dob = t.getDob().toString();
 
                 if(email == null || email.equals("")) {
                     return null;
                 }
+
+//                email = getUserKey(email);
 
                 UserData userData =
                         DynamoDBManager.loadObject(new UserData(email));
@@ -261,6 +274,37 @@ public class SocialAuth extends ActionBarActivity {
                 }
 
             return email;
+        }
+
+        public String getUserKey(String email) {
+
+            UserKey userContent = new UserKey();
+            userContent.setEmail("anmol007gupta@gmail.com");
+
+            Long timestamp = new Date().getTime();
+
+            Condition rangeKeyCondition = new Condition()
+                    .withComparisonOperator(ComparisonOperator.LT.toString())
+                    .withAttributeValueList(new AttributeValue().withN("" + timestamp));
+
+            DynamoDBQueryExpression queryExpression = new DynamoDBQueryExpression()
+                    .withHashKeyValues(userContent)
+                    .withRangeKeyCondition("Timestamp", rangeKeyCondition)
+                    .withConsistentRead(false);
+//                    .withIndexName("UpdatedTimestamp-index");
+
+            PaginatedQueryList<UserKey> result =
+                    DynamoDBManager.getQueryResult(UserKey.class, queryExpression);
+
+            if(result.size() == 0) {
+                userContent.setTimestamp(timestamp);
+                DynamoDBManager.saveObject(userContent);
+                 return userContent.getId();
+            }
+
+            else {
+                return result.get(0).getId();
+            }
         }
 
         protected void onPostExecute(String email) {

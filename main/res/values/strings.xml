@@ -40,5 +40,6 @@
     <string name="mineral1_prompt">Select Mineral</string>
     <string name="title_activity_view_table">ViewTable</string>
     <string name="title_activity_loading_data_test">LoadingDataTest</string>
+    <string name="title_activity_edit_text">EditTextActivity</string>
 
 </resources>

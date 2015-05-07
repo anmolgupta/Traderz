@@ -41,6 +41,10 @@
             android:name=".LoadingDataTest"
             android:label="@string/title_activity_loading_data_test" >
         </activity>
+        <activity
+            android:name=".EditTextActivity"
+            android:label="@string/title_activity_edit_text" >
+        </activity>
     </application>
 
 </manifest>

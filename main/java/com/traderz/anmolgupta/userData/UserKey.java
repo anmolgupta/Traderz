@@ -27,7 +27,8 @@ public class UserKey {
         this.email = email;
     }
 
-    @DynamoDBIndexRangeKey(attributeName = "Timestamp",localSecondaryIndexName="Timestamp-index")
+    @DynamoDBIndexRangeKey(attributeName = "Timestamp",
+            localSecondaryIndexName="Timestamp-index")
     public Long getTimestamp() {
 
         return timestamp;

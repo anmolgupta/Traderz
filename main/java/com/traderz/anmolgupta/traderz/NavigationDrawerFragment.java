@@ -66,25 +66,37 @@ public class NavigationDrawerFragment extends Fragment {
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
     private List<String> options;
-    private List<String> dummy;
+
+    private UserConnection userConn;
 
     public NavigationDrawerFragment() {
 
     }
 
-    public void setOptions(List<String> contacts) {
+    public void setOptions() {
 
-        ArrayList<String> dummy = new ArrayList<>();
-        dummy.addAll(options);
-        dummy.addAll(contacts);
+        ArrayList<String> dummy = new ArrayList<String>(options);
+        dummy.addAll(userConn.getContacts().getMap().keySet());
 
         mDrawerListView.setAdapter(new ArrayAdapter<String>(
                 getActionBar().getThemedContext(),
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
                 dummy));
+    }
 
-        options = dummy;
+    public String getValue( String key ) {
+
+        if(userConn != null)
+            return userConn.getContacts().getMap().get(key);
+
+        return "";
+    }
+
+    public int getStaticComponentCount() {
+
+        return options.size();
+
     }
 
     @Override
@@ -96,7 +108,6 @@ public class NavigationDrawerFragment extends Fragment {
                 "My View"};
 
         options = Arrays.asList(initial);
-        dummy = Arrays.asList(initial);
         // Read in the flag indicating whether or not the user has demonstrated awareness of the
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -110,7 +121,6 @@ public class NavigationDrawerFragment extends Fragment {
         // Select either the default item (0) or the last selected item.
         selectItem(mCurrentSelectedPosition);
 
-        dummy = new ArrayList<String>();
         new GetConnectionTask().execute("anmol007gupta@gmail.com");
     }
 
@@ -350,10 +360,8 @@ public class NavigationDrawerFragment extends Fragment {
 
             if(userConnection != null) {
 
-                List<String> contacts = new ArrayList<String>(
-                        userConnection.getContacts().getMap().values());
-
-                setOptions(contacts);
+                userConn = userConnection;
+                setOptions();
             }
         }
     }

@@ -95,14 +95,16 @@ public class MainAdminNavigation extends ActionBarActivity
             Bundle args = new Bundle();
 
             switch (position) {
-                case 0:
+                case 0:  fragment = new ViewTable();
+                    args.putString(ViewTable.TITLE, "anmol");
+                    args.putString(ViewTable.ID, "anmol007gupta@gmail.com");
+                    break;
+                case 1:  fragment = new AddConnection();
+                    break;
+                default:
                     fragment = new ViewTable();
                     args.putString(ViewTable.TITLE, "anmol");
                     args.putString(ViewTable.ID, "anmol007gupta@gmail.com");
-
-                    break;
-                default:
-                    fragment = new AddConnection();
                     break;
             }
 

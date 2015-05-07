@@ -44,6 +44,7 @@ public class ViewTable extends Fragment {
     public static final String TITLE = "title";
     public static final String ID = "id";
     private ViewTableCallbacks mCallbacks;
+    private List<UserContent> userContents;
 
     @Override
     public void onAttach( Activity activity ) {
@@ -60,6 +61,7 @@ public class ViewTable extends Fragment {
     public void onCreate( Bundle savedInstanceState ) {
 
         super.onCreate(savedInstanceState);
+        userContents = new ArrayList<UserContent>();
         new GetData().execute();
 
     }

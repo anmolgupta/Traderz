@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import com.traderz.anmolgupta.DynamoDB.AmazonClientManager;
+import com.traderz.anmolgupta.userData.Social;
 
 /**
  * Created by anmolgupta on 03/04/15.
