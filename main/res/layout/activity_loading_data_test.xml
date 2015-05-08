@@ -61,6 +61,11 @@
             android:layout_height="wrap_content"
             android:text="Main Admin Panel"
             android:id="@+id/main_admin_panel"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AddToTest"
+            android:id="@+id/test_button"/>
     </LinearLayout>
 
 </RelativeLayout>

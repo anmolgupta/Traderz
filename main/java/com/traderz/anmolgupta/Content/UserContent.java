@@ -26,6 +26,7 @@ public class UserContent {
     private CustomFields customFields;
     private Visibility visibility;
     private Set<String> contactsList; //depend on visibility.
+    private Buyer buyer;
 
     @DynamoDBAttribute(attributeName = "ContactsList")
     public Set<String> getContactsList() {
@@ -107,6 +108,18 @@ public class UserContent {
         this.visibility = visibleContacts;
     }
 
+    @DynamoDBAttribute(attributeName = "Buyer")
+    @DynamoDBMarshalling(marshallerClass = BuyerConverter.class)
+    public Buyer getBuyer(){
+
+        return buyer;
+    }
+
+    public void setBuyer(Buyer buyer) {
+
+        this.buyer = buyer;
+    }
+
     public UserContent() {
 
     }
@@ -127,13 +140,17 @@ public class UserContent {
     public boolean validateObject() {
 
 
-        if(visibility == Visibility.NEGATED || visibility ==Visibility.ALLOWED) {
+        if( visibility == Visibility.NEGATED ||
+                visibility ==Visibility.ALLOWED) {
 
             if(contactsList == null || contactsList.isEmpty()) {
                 return false;
             }
         }
 
+        if( visibility == Visibility.SOLD) {
+
+        }
         return true;
     }
 }

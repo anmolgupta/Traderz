@@ -17,6 +17,7 @@ import android.widget.TextView;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +26,11 @@ import java.util.Map;
  */
 public class AddRowActivity extends Fragment {
 
-    List<KeyValue> columnEntity;
+//    List<KeyValue> columnEntity;
+    EditText [] columnTitles;
+    EditText [] columnValues;
+
+    LinkedHashMap<String,String> columnEntity;
     int customColumnCount;
     int definedColumnNumber;
     ListView listView;
@@ -38,12 +43,19 @@ public class AddRowActivity extends Fragment {
 
         customColumnCount = 1;
 
-        columnEntity = new ArrayList<KeyValue>();
-        columnEntity.add(new KeyValue("Product Name",""));
-        columnEntity.add(new KeyValue("Product Description",""));
-        columnEntity.add(new KeyValue("Quantity",""));
-        columnEntity.add(new KeyValue("Price",""));
-        columnEntity.add(new KeyValue("Units",""));
+//        columnEntity = new ArrayList<KeyValue>();
+//        columnEntity.add(new KeyValue("Product Name",""));
+//        columnEntity.add(new KeyValue("Product Description",""));
+//        columnEntity.add(new KeyValue("Quantity",""));
+//        columnEntity.add(new KeyValue("Price",""));
+//        columnEntity.add(new KeyValue("Units",""));
+
+        columnEntity = new LinkedHashMap<String,String>();
+        columnEntity.put("Product Name","");
+        columnEntity.put("Product Description","");
+        columnEntity.put("Quantity","");
+        columnEntity.put("Price","");
+        columnEntity.put("Units","");
 
         definedColumnNumber = columnEntity.size();
 
@@ -77,12 +89,9 @@ public class AddRowActivity extends Fragment {
             @Override
             public void onClick( View v ) {
 
-                columnEntity.add(new KeyValue("Custom"+customColumnCount,""));
+                columnEntity.put("Custom"+customColumnCount++,"");
 
                 setAdapter();
-
-                customColumnCount++;
-
             }
         });
 
@@ -90,82 +99,82 @@ public class AddRowActivity extends Fragment {
         return view;
     }
 
-
-    KeyValue getKeyValue(String key){
-
-        for(KeyValue keyValue: columnEntity){
-
-            if(keyValue.getKey().equals(key)) {
-                return keyValue;
-            }
-        }
-        return null;
-    }
-
-    void replaceKeyValue(KeyValue keyValue) {
-
-        for(KeyValue eachKeyValue: columnEntity) {
-
-            if(eachKeyValue.getKey().equals(keyValue.getKey())) {
-                eachKeyValue = keyValue;
-            }
-        }
-    }
-
-    class KeyValue{
-
-        private String key;
-        private String value;
-
-        public KeyValue() {
-
-        }
-
-        public KeyValue(String key, String value){
-
-            this.key = key;
-            this.value = value;
-        }
-
-        public String getKey(){
-
-            return key;
-        }
-
-        public String getValue(){
-
-            return value;
-        }
-
-        public void setKey(String key){
-
-            this.key = key;
-        }
-
-        public void setValue(String value){
-            this.value = value;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-
-            if (obj == null) {
-                return false;
-            }
-
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-
-            final KeyValue other = (KeyValue) obj;
-
-            if ((this.key == null) ? (other.key != null) : !this.key.equals(other.key)) {
-                return false;
-            }
-
-            return true;
-        }
-    }
+//
+//    KeyValue getKeyValue(String key){
+//
+//        for(KeyValue keyValue: columnEntity){
+//
+//            if(keyValue.getKey().equals(key)) {
+//                return keyValue;
+//            }
+//        }
+//        return null;
+//    }
+//
+//    void replaceKeyValue(KeyValue keyValue) {
+//
+//        for(KeyValue eachKeyValue: columnEntity) {
+//
+//            if(eachKeyValue.getKey().equals(keyValue.getKey())) {
+//                eachKeyValue = keyValue;
+//            }
+//        }
+//    }
+//
+//    class KeyValue{
+//
+//        private String key;
+//        private String value;
+//
+//        public KeyValue() {
+//
+//        }
+//
+//        public KeyValue(String key, String value){
+//
+//            this.key = key;
+//            this.value = value;
+//        }
+//
+//        public String getKey(){
+//
+//            return key;
+//        }
+//
+//        public String getValue(){
+//
+//            return value;
+//        }
+//
+//        public void setKey(String key){
+//
+//            this.key = key;
+//        }
+//
+//        public void setValue(String value){
+//            this.value = value;
+//        }
+//
+//        @Override
+//        public boolean equals(Object obj) {
+//
+//            if (obj == null) {
+//                return false;
+//            }
+//
+//            if (getClass() != obj.getClass()) {
+//                return false;
+//            }
+//
+//            final KeyValue other = (KeyValue) obj;
+//
+//            if ((this.key == null) ? (other.key != null) : !this.key.equals(other.key)) {
+//                return false;
+//            }
+//
+//            return true;
+//        }
+//    }
 
     class MyAdapter extends ArrayAdapter<KeyValue> {
 
@@ -175,6 +184,8 @@ public class AddRowActivity extends Fragment {
 
             super(context, resource, objects);
             // TODO Auto-generated constructor stub
+            columnTitles = new EditText[objects.size()];
+            columnValues = new EditText[objects.size()];
             inflater = (LayoutInflater)context.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
@@ -186,101 +197,32 @@ public class AddRowActivity extends Fragment {
 
             View row = inflater.inflate(R.layout.fragment_add_row, parent, false);
 
-            final EditText columnName = (EditText) row.findViewById(R.id.column_name);
-            columnName.setEnabled(false);
+            columnTitles[position] = (EditText) row.findViewById(R.id.column_name);
+            columnTitles[position].setEnabled(false);
 
-            columnName.setText(columnEntity.get(position).key);
+            columnTitles[position].setText(columnEntity.get(position).key);
 
             Button editTextButton = (Button)row.findViewById(R.id.edit_text_button);
-//            editTextButton.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick( View v ) {
-//                    columnName.setEnabled(true);
-//                    columnName.requestFocus();
-//                }
-//            });
 
             if(position < definedColumnNumber) {
                 editTextButton.setEnabled(false);
                 editTextButton.setVisibility(View.INVISIBLE);
             }
 
-//            columnName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-//
-//                String originalValue;
-//                EditText editText1;
-//
-//                @Override
-//                public void onFocusChange( View v, boolean hasFocus ) {
-//
-//                    editText1 = (EditText)v;
-//
-//                    if(hasFocus) {
-//
-//                        originalValue =  editText1.getText().toString();
-//                        return;
-//                    }
-//
-//                    if(!hasFocus) {
-//
-//                        String newColumnName = editText1.getText().toString();
-//
-//                        if(newColumnName.equals(originalValue)){
-//                            v.setEnabled(false);
-//                            v.clearFocus();
-//                            return;
-//                        }
-//
-//                        KeyValue keyValue = new KeyValue(newColumnName,
-//                                columnEntity.get(position).value);
-//
-//
-//                        if(columnEntity.contains(keyValue)) {
-//
-//                            AlertDialog alertDialog = new AlertDialog.Builder(AddRowActivity.this).create();
-//                            alertDialog.setTitle("Alert");
-//                            alertDialog.setMessage("Alert message to be shown");
-//                            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-//                                    new DialogInterface.OnClickListener() {
-//                                        public void onClick(DialogInterface dialog, int which) {
-//
-//                                            editText1.setText(originalValue);
-//                                            editText1.requestFocus();
-//                                            dialog.dismiss();
-//                                        }
-//                                    });
-//                            alertDialog.show();
-//
-//                        } else {
-//
-//                            replaceKeyValue(keyValue);
-//                            v.setEnabled(false);
-//                            v.clearFocus();
-////                            setAdapter();
-//
-//                        }
-//                    }
-//
-//                }
-//            });
-
-            EditText columnValue = (EditText) row.findViewById(R.id.editText);
-            columnValue.setText(columnEntity.get(position).value);
-
-            //saving the value
-            columnValue.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            editTextButton.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onFocusChange( View v, boolean hasFocus ) {
+                public void onClick( View v ) {
 
-                    if(!hasFocus) {
-
-                        EditText editText1 = (EditText)v;
-
-                        columnEntity.get(position).value = editText1.getText().toString();
-
-                    }
+                    columnTitles[position].setEnabled(true);
+                    columnTitles[position].requestFocus();
+                    columnTitles[position].setSelection(
+                            columnTitles[position].getText().length());
+                    columnTitles[position].selectAll();
                 }
             });
+
+            columnValues[position] = (EditText) row.findViewById(R.id.editText);
+            columnValues[position].setText(columnEntity.get(position).value);
 
             return row;
         }

@@ -24,7 +24,7 @@ public class StartingActivity extends Activity {
         String userId = settings.getString("email", "");
 
         if(userId.equals("")) {
-            startActivity(new Intent(StartingActivity.this, SocialAuth.class));
+            startActivity(new Intent(StartingActivity.this, LoadingDataTest.class));
         } else {
             Intent intent = new Intent(StartingActivity.this, LoadingDataTest.class);
             intent.putExtra("email", userId);

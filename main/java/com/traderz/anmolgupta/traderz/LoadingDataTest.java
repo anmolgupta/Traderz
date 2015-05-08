@@ -12,6 +12,7 @@ import android.widget.EditText;
 
 import com.traderz.anmolgupta.Content.CustomFields;
 import com.traderz.anmolgupta.Content.UserContent;
+import com.traderz.anmolgupta.Content.UserTest;
 import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
 import com.traderz.anmolgupta.userData.EmailMappingToFullName;
 import com.traderz.anmolgupta.userData.UserConnection;
@@ -31,7 +32,7 @@ public class LoadingDataTest extends ActionBarActivity {
 
 
         final EditText keyText = (EditText) findViewById(R.id.keyText);
-        keyText.setText(getIntent().getExtras().getString("email"));
+//        keyText.setText(getIntent().getExtras().getString("email"));
 
         final EditText valueText1 = (EditText) findViewById(R.id.valueText1);
 
@@ -47,6 +48,9 @@ public class LoadingDataTest extends ActionBarActivity {
 
         Button mainAdminPanelButton = (Button) findViewById(R.id.main_admin_panel);
 
+        Button testButton = (Button) findViewById(R.id.test_button);
+
+
         mainAdminPanelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick( View v ) {
@@ -55,7 +59,14 @@ public class LoadingDataTest extends ActionBarActivity {
         });
 
 
+        testButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick( View v ) {
 
+
+                new SaveTestTask().execute();
+            }
+        });
 
         addMapContentButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -143,6 +154,29 @@ public class LoadingDataTest extends ActionBarActivity {
                     new EmailMappingToFullName(connections));
 
             DynamoDBManager.saveObject(userContent);
+
+            return null;
+        }
+    }
+
+    class SaveTestTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params ) {
+
+            Map<String, Integer> connections = new HashMap<String, Integer>();
+
+            connections.put("one", 1);
+            connections.put("two", 2);
+            connections.put("three", 3);
+            connections.put("four", 4);
+
+
+            UserTest userTest = new UserTest();
+            userTest.setEmail("anmol");
+            userTest.setDemo(connections);
+
+            DynamoDBManager.saveObject(userTest);
 
             return null;
         }
