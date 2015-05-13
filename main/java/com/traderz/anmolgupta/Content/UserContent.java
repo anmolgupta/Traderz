@@ -10,7 +10,9 @@ import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBTable;
 import com.traderz.anmolgupta.userData.EmailMappingToFullNameConverter;
 import com.traderz.anmolgupta.utilities.EnumMarshaller;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -137,6 +139,12 @@ public class UserContent {
 
     }
 
+    public UserContent(String email, String rowID) {
+
+        this.userEmail = email;
+        this.id = rowID;
+    }
+
     public boolean validateObject() {
 
 
@@ -153,4 +161,5 @@ public class UserContent {
         }
         return true;
     }
+
 }

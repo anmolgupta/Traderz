@@ -1,51 +1,58 @@
 package com.traderz.anmolgupta.traderz;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
-import android.app.ListActivity;
-import android.content.Context;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.TextView;
+        import android.app.AlertDialog;
+        import android.app.Dialog;
+        import android.content.DialogInterface;
+        import android.content.SharedPreferences;
+        import android.os.AsyncTask;
+        import android.support.v4.app.Fragment;
+        import android.content.Context;
+        import android.os.Bundle;
+        import android.view.LayoutInflater;
+        import android.view.View;
+        import android.view.ViewGroup;
+        import android.widget.ArrayAdapter;
+        import android.widget.Button;
+        import android.widget.EditText;
+        import android.widget.ListView;
 
-import com.traderz.anmolgupta.Content.CustomFields;
-import com.traderz.anmolgupta.Content.UserContent;
-import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
+        import com.traderz.anmolgupta.Content.CustomFields;
+        import com.traderz.anmolgupta.Content.UserContent;
+        import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
+        import com.traderz.anmolgupta.userData.UserConnection;
 
-import java.security.Key;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+        import java.security.Key;
+        import java.util.ArrayList;
+        import java.util.HashMap;
+        import java.util.LinkedHashMap;
+        import java.util.List;
+        import java.util.Map;
 
 /**
  * Created by anmolgupta on 27/04/15.
  */
-public class AddRowActivity extends Fragment {
+public class ViewEditRowActivity extends Fragment {
 
-    EditText [] columnTitles;
+    public static String ID = "ID";
+    public static String ROW_ID = "ROW_ID";
+    public static String MAP = "MAP";
+
+    String privateId, importedId, importedRowId;
+
+
+    //    List<KeyValue> columnEntity;
+    EditText[] columnTitles;
     EditText [] columnValues;
 
     final String CUSTOM_COLUMN_NAME = "Custom";
-    String userId;
+
+    boolean originalUser;
+
     LinkedHashMap<String,String> columnEntity;
     int customColumnCount;
-    int definedColumnNumber;
+
     ListView listView;
     List<KeyValue> list;
-    UserContent userContent;
     @Override
     public void onCreate( Bundle savedInstanceState ) {
 
@@ -61,19 +68,27 @@ public class AddRowActivity extends Fragment {
 //        columnEntity.add(new KeyValue("Price",""));
 //        columnEntity.add(new KeyValue("Units",""));
 
-        SharedPreferences settings = getActivity().getPreferences(0);
-        userId = settings.getString("email", "");
+        SharedPreferences settings = this.getActivity().getSharedPreferences("Traderz", 0);
+        privateId = settings.getString("email", "");
 
-        columnEntity = new LinkedHashMap<String,String>();
+        importedRowId = getArguments().getString(ROW_ID);
+        importedId = getArguments().getString(ID);
 
-        for(String field : CustomFields.getColumns())
-            columnEntity.put(field,"");
+        if(privateId.equalsIgnoreCase(importedId))
+              originalUser = true;
+        else
+            originalUser = false;
+
+
+        new GetRow().execute();
+//        columnEntity = new LinkedHashMap<String,String>();
+//        columnEntity.put("Product Name","");
 //        columnEntity.put("Product Description","");
 //        columnEntity.put("Quantity","");
 //        columnEntity.put("Price","");
 //        columnEntity.put("Units","");
-
-        definedColumnNumber = columnEntity.size();
+//
+//        definedColumnNumber = columnEntity.size();
 
     }
 
@@ -81,15 +96,36 @@ public class AddRowActivity extends Fragment {
 
         list = new ArrayList<KeyValue>();
 
+        if(columnEntity == null ){
+            populateColumnEntity();
+        }
+
         for(Map.Entry<String, String> entry: columnEntity.entrySet()) {
             list.add(new KeyValue(entry.getKey(), entry.getValue()));
         }
 
         listView.setAdapter(new MyAdapter(getActivity(),
-                        android.R.layout.simple_list_item_1,
-                        list));
+                android.R.layout.simple_list_item_1,
+                list));
     }
 
+    void populateColumnEntity() {
+
+        columnEntity = new LinkedHashMap<String,String>();
+
+        for(String columnName : CustomFields.getColumns()) {
+            columnEntity.put(columnName, "");
+        }
+    }
+
+    void setMap(Map<String, String> map) {
+
+        populateColumnEntity();
+
+        columnEntity.putAll(map);
+
+        setAdapter();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -101,7 +137,7 @@ public class AddRowActivity extends Fragment {
 //        String url = getArguments().getString("url");
 
 		/* Creating view corresponding to the fragment */
-         View view = inflater.inflate(R.layout.activity_add_row,
+        View view = inflater.inflate(R.layout.activity_add_row,
                 container, false);
 
         listView = (ListView)view.findViewById(android.R.id.list);
@@ -110,21 +146,6 @@ public class AddRowActivity extends Fragment {
         addRow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick( View v ) {
-
-                CustomFields customFields = new CustomFields(columnEntity);
-                String validString = customFields.isValid();
-
-                if(validString != null) {
-
-                    return;
-                }
-
-                userContent = new UserContent(userId, customFields);
-
-                if(!userContent.validateObject()) {
-
-                    return;
-                }
 
                 new AddRow().execute();
             }
@@ -138,16 +159,16 @@ public class AddRowActivity extends Fragment {
                 columnEntity = new LinkedHashMap<String,String>();
 
                 for(int i = 0; i < columnTitles.length; i++) {
-                   columnEntity.put(columnTitles[i].getText().toString().trim(),
-                           columnValues[i].getText().toString().trim());
-               }
+                    columnEntity.put(columnTitles[i].getText().toString().trim(),
+                            columnValues[i].getText().toString().trim());
+                }
 
                 int temp = customColumnCount;
                 String customString = CUSTOM_COLUMN_NAME+temp;
 
                 while(columnEntity.containsKey(customString)) {
 
-                     customString = CUSTOM_COLUMN_NAME+(++temp);
+                    customString = CUSTOM_COLUMN_NAME+(++temp);
                 }
 
                 ++temp;
@@ -159,6 +180,14 @@ public class AddRowActivity extends Fragment {
                 setAdapter();
             }
         });
+
+        if(!originalUser) {
+            button.setEnabled(false);
+            button.setVisibility(View.INVISIBLE);
+
+            addRow.setEnabled(false);
+            addRow.setVisibility(View.INVISIBLE);
+        }
 
         setAdapter();
         return view;
@@ -252,7 +281,7 @@ public class AddRowActivity extends Fragment {
                                 AlertDialog.Builder builder =
                                         new AlertDialog.Builder(getActivity());
                                 builder.setMessage("The Column Name is Already Present")
-                                .setCancelable(false)
+                                        .setCancelable(false)
                                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
                                                 dialog.cancel();
@@ -272,7 +301,7 @@ public class AddRowActivity extends Fragment {
                 }
             });
 
-            if(position < definedColumnNumber) {
+            if(position < CustomFields.getColumns().size() || !originalUser) {
                 editTextButton.setEnabled(false);
                 editTextButton.setVisibility(View.INVISIBLE);
             }
@@ -283,7 +312,6 @@ public class AddRowActivity extends Fragment {
             return row;
         }
 
-
     }
 
     class AddRow extends AsyncTask<Void, Void, Void> {
@@ -291,8 +319,28 @@ public class AddRowActivity extends Fragment {
         @Override
         protected Void doInBackground( Void... params ) {
 
+            UserContent userContent = new UserContent(importedId, new CustomFields(columnEntity));
             DynamoDBManager.saveObject(userContent);
             return null;
+        }
+    }
+
+    class GetRow extends AsyncTask<Void, Void, Map<String,String>> {
+
+        @Override
+        protected Map<String, String> doInBackground( Void... params ) {
+
+            UserContent userContent = new UserContent(importedId, importedRowId);
+
+            userContent = DynamoDBManager.loadObject(userContent);
+
+            return userContent.getCustomFields().getMap();
+        }
+
+        @Override
+        protected void onPostExecute(Map<String,String> map) {
+
+            setMap(map);
         }
     }
 

@@ -45,6 +45,7 @@ public class ViewTable extends Fragment {
     public static final String ID = "id";
     private ViewTableCallbacks mCallbacks;
     private List<UserContent> userContents;
+    private ListView listView;
 
     @Override
     public void onAttach( Activity activity ) {
@@ -65,7 +66,8 @@ public class ViewTable extends Fragment {
         new GetData().execute();
 
     }
-        @Override
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         /* Updating the action bar title */
@@ -79,13 +81,9 @@ public class ViewTable extends Fragment {
                 container, false);
 
         //TODO:: Get the list of CustomFields from UserContent
-        List<CustomFields> customFields  = new ArrayList<CustomFields>();
 
-        ListView listView = (ListView)view.findViewById(android.R.id.list);
+        listView = (ListView)view.findViewById(android.R.id.list);
 
-        listView.setAdapter(new MyAdapter(getActivity(),
-                android.R.layout.simple_list_item_1,
-                customFields));
 		/* Initializing and loading url in WebView */
 
         Button addRow = (Button)view.findViewById(R.id.add_row);
@@ -98,15 +96,33 @@ public class ViewTable extends Fragment {
                 }
         });
 
+        setAdapter(null);
         return view;
     }
 
-    class MyAdapter extends ArrayAdapter<CustomFields>{
+    public void setAdapter(List<UserContent> userContents1) {
+
+        if(userContents1 == null && userContents == null) {
+
+            userContents = new ArrayList<UserContent>();
+
+        } else if(userContents1 != null) {
+
+            userContents = new ArrayList<>(userContents1);
+        }
+
+
+        listView.setAdapter(new MyAdapter(getActivity(),
+                android.R.layout.simple_list_item_1,
+                userContents));
+    }
+
+    class MyAdapter extends ArrayAdapter<UserContent>{
         int anmol;
-        List<CustomFields> content;
+        List<UserContent> content;
         LayoutInflater inflator;
         public MyAdapter( Context context, int resource,
-                         List<CustomFields> objects ) {
+                         List<UserContent> objects ) {
 
             super(context, resource, objects);
             content= objects;
@@ -124,21 +140,23 @@ public class ViewTable extends Fragment {
 
             View row = inflator.inflate(R.layout.fragment_table_row, parent, false);
 
-            final Map<String,String> map = content.get(position).getMap();
+            final Map<String,String> map = content.get(position).getCustomFields().getMap();
 
+            List<String> list = CustomFields.getColumns();
             TextView productName = (TextView) row.findViewById(R.id.product_name);
-            productName.setText(map.get("productName"));
+            productName.setText(map.get(list.get(0)));
 
 
             TextView productDescription = (TextView) row.findViewById(R.id.product_description);
-            productDescription.setText(map.get("productDescription"));
+            productDescription.setText(map.get(list.get(1)));
 
-            final String id = map.get("id");
+
             row.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick( View v ) {
 
-                    mCallbacks.onViewTableCallbacks(id, new HashMap<String,String>(map));
+                    mCallbacks.onViewTableCallbacks(content.get(position).getId(),
+                            content.get(position).getUserEmail(), new HashMap<String,String>(map));
                 }
             });
             return row;
@@ -151,7 +169,7 @@ public class ViewTable extends Fragment {
         /**
          * Called when an item in the navigation drawer is selected.
          */
-        void onViewTableCallbacks(String id, HashMap<String,String> map);
+        void onViewTableCallbacks(String rowId, String id, HashMap<String,String> map);
         void onAddRowInTableCallbacks();
     }
 
@@ -187,10 +205,15 @@ public class ViewTable extends Fragment {
         @Override
         protected void onPostExecute(PaginatedQueryList<UserContent> userConnection) {
 
+            List<UserContent> userContents1 = new ArrayList<>();
             if(userConnection != null) {
 
-                //TODO:: Do something
+                for(UserContent userContent : userConnection) {
 
+                    userContents1.add(userContent);
+                }
+
+                setAdapter(userContents1);
             }
         }
     }

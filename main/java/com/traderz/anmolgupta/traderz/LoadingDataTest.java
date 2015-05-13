@@ -19,6 +19,7 @@ import com.traderz.anmolgupta.userData.UserConnection;
 import com.traderz.anmolgupta.userData.UserContacts;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -32,7 +33,7 @@ public class LoadingDataTest extends ActionBarActivity {
 
 
         final EditText keyText = (EditText) findViewById(R.id.keyText);
-//        keyText.setText(getIntent().getExtras().getString("email"));
+        keyText.setText(getIntent().getExtras().getString("email"));
 
         final EditText valueText1 = (EditText) findViewById(R.id.valueText1);
 
@@ -124,10 +125,17 @@ public class LoadingDataTest extends ActionBarActivity {
 
             Map connections = new HashMap();
 
-            connections.put("productName", params[0]);
-            connections.put("productDescription", params[1]);
-            connections.put("quantity", params[2]);
-            connections.put("Price", params[3]);
+            List<String> list = CustomFields.getColumns();
+
+            for(int i = 0; i< list.size(); i++) {
+
+                connections.put(list.get(i), params[i]);
+            }
+
+//            connections.put("productName", params[0]);
+//            connections.put("productDescription", params[1]);
+//            connections.put("quantity", params[2]);
+//            connections.put("Price", params[3]);
 
             UserContent userContent = new UserContent(params[4],
                     new CustomFields(connections));

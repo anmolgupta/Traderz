@@ -171,13 +171,14 @@ public class MainAdminNavigation extends ActionBarActivity
     }
 
     @Override
-    public void onViewTableCallbacks( String id, HashMap<String,String> map) {
+    public void onViewTableCallbacks( String rowId, String id, HashMap<String,String> map) {
 
         Bundle args = new Bundle();
-        args.putString(ViewTable.TITLE, id);
-        args.putSerializable("abc",  map);
+        args.putString(ViewEditRowActivity.ID, id);
+        args.putString(ViewEditRowActivity.ROW_ID, rowId);
+        args.putSerializable(ViewEditRowActivity.MAP,  map);
 
-        Fragment fragment = new AddRowActivity();
+        Fragment fragment = new ViewEditRowActivity();
         fragment.setArguments(args);
 
         setFragment(fragment);
