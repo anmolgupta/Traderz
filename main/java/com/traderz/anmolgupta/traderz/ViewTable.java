@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.content.Context;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -94,6 +95,16 @@ public class ViewTable extends Fragment {
                 public void onClick( View v ) {
                     mCallbacks.onAddRowInTableCallbacks();
                 }
+        });
+
+        SwipeRefreshLayout mSwipeRefreshLayout = (SwipeRefreshLayout)
+                view.findViewById(R.id.activity_main_swipe_refresh_layout);
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+            }
         });
 
         setAdapter(null);
@@ -191,13 +202,9 @@ public class ViewTable extends Fragment {
                     .withHashKeyValues(userContent)
                     .withRangeKeyCondition("UpdatedTimestamp", rangeKeyCondition)
                     .withConsistentRead(false);
-//                    .withIndexName("UpdatedTimestamp-index");
 
             PaginatedQueryList<UserContent> result =
                     DynamoDBManager.getQueryResult(UserContent.class, queryExpression);
-
-//            PaginatedScanList<UserContent> result1 =
-//                    DynamoDBManager.getScanResult(UserContent.class, new DynamoDBScanExpression());
 
             return result;
         }

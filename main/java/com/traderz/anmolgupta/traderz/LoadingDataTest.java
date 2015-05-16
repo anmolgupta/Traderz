@@ -17,6 +17,7 @@ import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
 import com.traderz.anmolgupta.userData.EmailMappingToFullName;
 import com.traderz.anmolgupta.userData.UserConnection;
 import com.traderz.anmolgupta.userData.UserContacts;
+import com.traderz.anmolgupta.utilities.TestAdapter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +51,20 @@ public class LoadingDataTest extends ActionBarActivity {
         Button mainAdminPanelButton = (Button) findViewById(R.id.main_admin_panel);
 
         Button testButton = (Button) findViewById(R.id.test_button);
+
+        Button sqlButton = (Button) findViewById(R.id.sql_database);
+
+
+        sqlButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick( View v ) {
+
+                TestAdapter test = new TestAdapter(LoadingDataTest.this);
+                test.open();
+                test.isTableExists("content");
+
+            }
+        });
 
 
         mainAdminPanelButton.setOnClickListener(new View.OnClickListener() {

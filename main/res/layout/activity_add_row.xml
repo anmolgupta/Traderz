@@ -31,11 +31,12 @@
 
     </LinearLayout>
 
-    <ListView android:id="@android:id/list"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content">
-
-        </ListView>
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:descendantFocusability="beforeDescendants">
+    </ListView>
 
 
 </LinearLayout>

@@ -7,9 +7,12 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.traderz.anmolgupta.Content.UserContent;
+import com.traderz.anmolgupta.SQLLiteClasses.UserContentSQLLite;
+
 public class TestAdapter
 {
-    protected static final String TAG = "DataAdapter";
+    protected static final String TAG = "TestAdapter";
 
     private final Context mContext;
     private SQLiteDatabase mDb;
@@ -39,8 +42,7 @@ public class TestAdapter
     {
         try
         {
-            mDbHelper.openDataBase();
-            mDbHelper.close();
+
             mDb = mDbHelper.getReadableDatabase();
         }
         catch (SQLException mSQLException)
@@ -59,13 +61,12 @@ public class TestAdapter
 
     public Cursor getData(String s)
     {
+        open();
         try
         {
-
             Cursor mCur = mDb.rawQuery(s, null);
             if (mCur!=null)
             {
-                //mCur.moveToNext();
                 mCur.moveToFirst();
             }
             return mCur;
@@ -75,6 +76,33 @@ public class TestAdapter
             Log.e(TAG, "getTestData >>"+ mSQLException.toString());
             throw mSQLException;
         }
+    }
+
+    public boolean isTableExists(String tableName) {
+
+        open();
+
+        Cursor cursor = mDb.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = '"+tableName+"'", null);
+
+        if(cursor!=null) {
+            if(cursor.getCount()>0) {
+
+                cursor.moveToFirst();
+                if(cursor.getString(0).equalsIgnoreCase(tableName)) {
+
+                    cursor.close();
+                    return true;
+                }
+            }
+            cursor.close();
+        }
+        return false;
+    }
+
+
+    protected void finalize( ) throws Throwable {
+        close();
+        super.finalize();
     }
 
 }

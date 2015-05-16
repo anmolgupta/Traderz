@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Created by anmolgupta on 29/04/15.
  */
-public class CustomFields {
+public class CustomFields implements Cloneable{
 
     @SerializedName("content")
     Map<String, String> map  = new HashMap<String, String>();
@@ -43,11 +43,11 @@ public class CustomFields {
     public static List<String> getColumns() {
 
         List<String> list = new ArrayList<String>();
-        list.add("Product Name");
-        list.add("Product Description");
-        list.add("Quantity");
-        list.add("Price");
-        list.add("Units");
+        list.add(CustomFieldsEnum.PRODUCT_NAME.getName());
+        list.add(CustomFieldsEnum.PRODUCT_DESCRIPTION.getName());
+        list.add(CustomFieldsEnum.QUANTITY.getName());
+        list.add(CustomFieldsEnum.PRICE.getName());
+        list.add(CustomFieldsEnum.UNITS.getName());
         return list;
     }
 
@@ -69,4 +69,9 @@ public class CustomFields {
 
         return null;
     }
+
+    public Object clone()throws CloneNotSupportedException{
+        return super.clone();
+    }
+
 }
