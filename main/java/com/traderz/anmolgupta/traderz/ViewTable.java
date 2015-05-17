@@ -1,16 +1,14 @@
 package com.traderz.anmolgupta.traderz;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -18,20 +16,15 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBQueryExpression;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBScanExpression;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedQueryList;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedScanList;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
 import com.amazonaws.services.dynamodbv2.model.Condition;
-import com.amazonaws.services.dynamodbv2.model.QueryResult;
 import com.traderz.anmolgupta.Content.CustomFields;
 import com.traderz.anmolgupta.Content.UserContent;
 import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
-import com.traderz.anmolgupta.userData.UserConnection;
-import com.traderz.anmolgupta.userData.UserContacts;
+import com.traderz.anmolgupta.SQLLiteClasses.UserContentAdapter;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -46,7 +39,10 @@ public class ViewTable extends Fragment {
     public static final String ID = "id";
     private ViewTableCallbacks mCallbacks;
     private List<UserContent> userContents;
+    private Context context;
     private ListView listView;
+
+    private String privateId;
 
     @Override
     public void onAttach( Activity activity ) {
@@ -63,8 +59,30 @@ public class ViewTable extends Fragment {
     public void onCreate( Bundle savedInstanceState ) {
 
         super.onCreate(savedInstanceState);
+
         userContents = new ArrayList<UserContent>();
-        new GetData().execute();
+
+        context = getActivity();
+
+        SharedPreferences settings = getActivity().getSharedPreferences("Traderz", 0);
+        privateId = settings.getString("email", "");
+
+        UserContentAdapter userContentAdapter = new UserContentAdapter(context, privateId);
+
+        if(!userContentAdapter.isTableExists()) {
+            new GetData().execute();
+        } else {
+
+            List<UserContent> userContentList = userContentAdapter.getUserContentByQuery("Select * from <tableName> order by "
+                    +UserContentAdapter.UPDATE_TIMESTAMP);
+
+            if(userContentList.isEmpty())
+                new GetData().execute();
+
+            else
+                setAdapter(userContentList);
+        }
+
 
     }
 
@@ -190,13 +208,45 @@ public class ViewTable extends Fragment {
         protected PaginatedQueryList<UserContent> doInBackground( Void... params ) {
 
             UserContent userContent = new UserContent();
-            userContent.setUserEmail("anmol007gupta@gmail.com");
+            userContent.setUserEmail(privateId);
 
-            Long timestamp = new Date().getTime();
+            UserContentAdapter userContentAdapter = new UserContentAdapter(context,privateId);
 
-            Condition rangeKeyCondition = new Condition()
-                    .withComparisonOperator(ComparisonOperator.LT.toString())
-                    .withAttributeValueList(new AttributeValue().withN("" + timestamp));
+            Condition rangeKeyCondition = null;
+
+            boolean tableExists = userContentAdapter.isTableExists();
+
+            if(tableExists) {
+
+                Long timestamp = null;
+                Cursor cursor =
+                        userContentAdapter.fireRandomQuery("select max("+ UserContentAdapter.UPDATE_TIMESTAMP+") from <tableName>");
+
+                if(cursor == null) {
+
+                    timestamp = new Date().getTime();
+
+                }else{
+
+                    timestamp = cursor.getLong(0);
+
+                    if(timestamp == null) {
+                        timestamp = new Date().getTime();
+                    }
+                }
+
+                rangeKeyCondition = new Condition()
+                        .withComparisonOperator(ComparisonOperator.LT.toString())
+                        .withAttributeValueList(new AttributeValue().withN("" + timestamp));
+            } else {
+                Long timestamp = new Date().getTime();
+
+                rangeKeyCondition = new Condition()
+                        .withComparisonOperator(ComparisonOperator.LT.toString())
+                        .withAttributeValueList(new AttributeValue().withN("" + timestamp));
+
+
+            }
 
             DynamoDBQueryExpression queryExpression = new DynamoDBQueryExpression()
                     .withHashKeyValues(userContent)
@@ -212,12 +262,21 @@ public class ViewTable extends Fragment {
         @Override
         protected void onPostExecute(PaginatedQueryList<UserContent> userConnection) {
 
+
             List<UserContent> userContents1 = new ArrayList<>();
             if(userConnection != null) {
+
+                UserContentAdapter userContentAdapter = new UserContentAdapter(context,privateId);
+
+                if(!userContentAdapter.isTableExists()) {
+                    userContentAdapter.createTable();
+                }
 
                 for(UserContent userContent : userConnection) {
 
                     userContents1.add(userContent);
+
+                    userContentAdapter.addUserConent(userContent);
                 }
 
                 setAdapter(userContents1);

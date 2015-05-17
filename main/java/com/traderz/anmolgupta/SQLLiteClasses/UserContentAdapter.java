@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * Created by anmolgupta on 16/05/15.
  */
-public class UserContentSQLLite {
+public class UserContentAdapter {
 
     private static String TAG = "UserContentSQLLite";
 
@@ -45,10 +45,16 @@ public class UserContentSQLLite {
     private static final String[] COLUMNS = {COLUMN_ID,USER_ID,UPDATE_TIMESTAMP,
             TIMESTAMP,PRODUCT_NAME,PRODUCT_DESCRIPTION,QUANTITY,PRICE,UNITS,CUSTOM};
 
-    public UserContentSQLLite(Context context, String tableName){
+    public UserContentAdapter( Context context, String tableName ){
 
         mDbHelper = new DatabaseHelper(context);
-        this.tableName = tableName;
+
+        this.tableName = getTableNameFromUserKey(tableName);;
+    }
+
+    public String getTableNameFromUserKey(String tableName) {
+
+        return tableName.replaceAll("[^\\w]","");
     }
 
     public void getReadableDatabase() throws SQLException
@@ -79,10 +85,10 @@ public class UserContentSQLLite {
         }
     }
 
-    private String getTableName(String tableName) {
+    private String getCreateTableQuery() {
 
         String retStr = "CREATE TABLE  IF NOT EXIST "
-                + tableName + "("+
+                + tableName + " ("+
                 COLUMN_ID + " text primary key, "+
                 USER_ID + " text, "+
                 UPDATE_TIMESTAMP + " numeric, "+
@@ -95,12 +101,6 @@ public class UserContentSQLLite {
                 CUSTOM + " text); ";
 
         return retStr;
-    }
-
-    public void createTable(String tableName) {
-
-        mDbHelper.createTable(getTableName(tableName));
-
     }
 
     public void close() {
@@ -131,28 +131,32 @@ public class UserContentSQLLite {
 
         values.put(PRODUCT_NAME, map.remove(CustomFieldsEnum.PRODUCT_NAME.getName()));
         values.put(PRODUCT_DESCRIPTION, map.remove(CustomFieldsEnum.PRODUCT_DESCRIPTION.getName()));
-        values.put(QUANTITY, Float.parseFloat(map.remove(CustomFieldsEnum.QUANTITY.getName())));
-        values.put(PRICE,  Float.parseFloat(map.remove(CustomFieldsEnum.PRICE.getName())));
+        values.put(QUANTITY, Double.parseDouble(map.remove(CustomFieldsEnum.QUANTITY.getName())));
+        values.put(PRICE,  Double.parseDouble(map.remove(CustomFieldsEnum.PRICE.getName())));
         values.put(UNITS, map.remove(CustomFieldsEnum.UNITS.getName()));
 
-        values.put(CUSTOM, GenericConverters.convertMapToString(map));
+        values.put(CUSTOM, GenericConverters.convertObjectToString(map));
 
         return values;
     }
 
     public void addUserConent(UserContent userContent){
 
-        // 1. get reference to writable DB
+        UserContent userContentTemp = getUserContentById(userContent.getId());
+
         this.getWritableDatabase();
 
-        // 2. create ContentValues to add key "column"/value
-        ContentValues values = getContentValue(userContent);
+        //Adding
+        if(userContentTemp == null ) {
 
-        // 3. insert
-        mDb.insert(tableName, // table
-                null, //nullColumnHack
-                values); // key/value -> keys = column names/ values = column values
+            ContentValues values = getContentValue(userContent);
+            mDb.insert(tableName, // table
+                    null, //nullColumnHack
+                    values); // key/value -> keys = column names/ values = column values
+        } else {
 
+            updateUserContent(userContent);
+        }
     }
 
     public void deleteUserContent(UserContent userContent) {
@@ -190,9 +194,8 @@ public class UserContentSQLLite {
         userContent.setTimestamp(cursor.getLong(cursor.getColumnIndex(TIMESTAMP)));
 
 
-        Map<String,String> map= new HashMap<String,String>(GenericConverters.convertStringToMap(
-                cursor.getString(cursor.getColumnIndex(CUSTOM))
-        ));
+        Map<String,String> map= new HashMap<String,String>(GenericConverters.convertStringToObject(
+                cursor.getString(cursor.getColumnIndex(CUSTOM)), Map.class));
 
         map.put(CustomFieldsEnum.PRODUCT_NAME.getName(),
                 cursor.getString(cursor.getColumnIndex(PRODUCT_NAME)));
@@ -239,13 +242,13 @@ public class UserContentSQLLite {
         return userContent;
     }
 
-    public List<UserContent> getUserContentByQuery(String clause){
+    public List<UserContent> getUserContentByQuery(String query){
 
         getReadableDatabase();
 
-        List<UserContent> userContentList = new LinkedList<UserContent>();
+        query = query.replaceAll("<tableName>", tableName);
 
-        String query = "SELECT  * FROM " + tableName +" "+clause;
+        List<UserContent> userContentList = new LinkedList<UserContent>();
 
         Cursor cursor = mDb.rawQuery(query, null);
 
@@ -259,6 +262,44 @@ public class UserContentSQLLite {
         return userContentList;
     }
 
+    public Cursor fireRandomQuery(String query) {
+
+        getReadableDatabase();
+        query = query.replaceAll("<tableName>", tableName);
+
+        Cursor cursor = mDb.rawQuery(query, null);
+
+        if(cursor != null)
+            cursor.moveToFirst();
+
+        return cursor;
+    }
+
+    public boolean isTableExists() {
+
+        getReadableDatabase();
+
+        Cursor cursor = mDb.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = '"+tableName+"'", null);
+
+        if(cursor!=null) {
+            if(cursor.getCount()>0) {
+
+                cursor.moveToFirst();
+                if(cursor.getString(0).equalsIgnoreCase(tableName)) {
+
+                    cursor.close();
+                    return true;
+                }
+            }
+            cursor.close();
+        }
+        return false;
+    }
+
+    public void createTable() {
+
+        mDbHelper.createTable(getCreateTableQuery());
+    }
 
     protected void finalize( ) throws Throwable {
 

@@ -9,7 +9,7 @@ import java.util.Map;
  */
 public class GenericConverters {
 
-    public static String convertMapToString(Map<String,String> map){
+    public static<T> String convertObjectToString(T map){
 
         Gson gson = new Gson();
         try {
@@ -25,11 +25,11 @@ public class GenericConverters {
         return "";
     }
 
-    public static Map<String,String> convertStringToMap(String jsonStr){
+    public static <T> T convertStringToObject(String jsonStr, Class<T> Clazz){
 
         Gson gson = new Gson();
         try {
-            return gson.fromJson(jsonStr, Map.class);
+            return gson.fromJson(jsonStr, Clazz);
 
         } catch(Exception e) {
 

@@ -34,6 +34,7 @@ import com.traderz.anmolgupta.utilities.GenericConverters;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -167,7 +168,7 @@ public class NavigationDrawerFragment extends Fragment {
 
             EmailMappingToFullName emailMappingToFullName =
                     new EmailMappingToFullName(
-                            GenericConverters.convertStringToMap(privateMap));
+                            GenericConverters.convertStringToObject(privateMap, Map.class));
 
             userConn = new UserConnection(settings.getString("email",""),
                     emailMappingToFullName);
@@ -390,7 +391,7 @@ public class NavigationDrawerFragment extends Fragment {
 
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("userConnection",
-                        GenericConverters.convertMapToString(userConnection.getContacts().getMap()));
+                        GenericConverters.convertObjectToString(userConnection.getContacts().getMap()));
                 editor.commit();
 
                 userConn = userConnection;
