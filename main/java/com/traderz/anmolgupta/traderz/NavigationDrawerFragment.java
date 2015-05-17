@@ -1,5 +1,6 @@
 package com.traderz.anmolgupta.traderz;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;
@@ -23,12 +24,17 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.amazonaws.com.google.gson.Gson;
 import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
+import com.traderz.anmolgupta.userData.EmailMappingToFullName;
+import com.traderz.anmolgupta.userData.EmailMappingToFullNameConverter;
 import com.traderz.anmolgupta.userData.UserConnection;
+import com.traderz.anmolgupta.utilities.GenericConverters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -66,6 +72,7 @@ public class NavigationDrawerFragment extends Fragment {
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
     private List<String> options;
+    private Context context;
 
     private UserConnection userConn;
 
@@ -110,6 +117,7 @@ public class NavigationDrawerFragment extends Fragment {
         options = Arrays.asList(initial);
         // Read in the flag indicating whether or not the user has demonstrated awareness of the
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
+        context = getActivity();
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mUserLearnedDrawer = sp.getBoolean(PREF_USER_LEARNED_DRAWER, false);
 
@@ -120,8 +128,6 @@ public class NavigationDrawerFragment extends Fragment {
 
         // Select either the default item (0) or the last selected item.
         selectItem(mCurrentSelectedPosition);
-
-        new GetConnectionTask().execute("anmol007gupta@gmail.com");
     }
 
     @Override
@@ -152,6 +158,23 @@ public class NavigationDrawerFragment extends Fragment {
                 android.R.id.text1,
                 options));
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
+
+        SharedPreferences settings = getActivity().getSharedPreferences("Traderz", 0);
+        String privateMap = settings.getString("userConnection", "");
+
+        if(privateMap ==null || privateMap.equals("")) {
+            new GetConnectionTask().execute(settings.getString("email",""));
+        }else {
+
+            EmailMappingToFullName emailMappingToFullName =
+                    new EmailMappingToFullName(
+                            GenericConverters.convertStringToObject(privateMap, Map.class));
+
+            userConn = new UserConnection(settings.getString("email",""),
+                    emailMappingToFullName);
+            setOptions();
+        }
+
         return mDrawerListView;
     }
 
@@ -349,6 +372,7 @@ public class NavigationDrawerFragment extends Fragment {
         @Override
         protected UserConnection doInBackground( String... params ) {
 
+
             UserConnection userConnection =
                     DynamoDBManager.loadObject(new UserConnection(params[0]));
 
@@ -359,6 +383,16 @@ public class NavigationDrawerFragment extends Fragment {
         protected void onPostExecute(UserConnection userConnection) {
 
             if(userConnection != null) {
+
+                SharedPreferences settings = context.getSharedPreferences("Traderz", 0);
+
+                EmailMappingToFullNameConverter emailMappingToFullNameConverter =
+                        new EmailMappingToFullNameConverter();
+
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putString("userConnection",
+                        GenericConverters.convertObjectToString(userConnection.getContacts().getMap()));
+                editor.commit();
 
                 userConn = userConnection;
                 setOptions();

@@ -12,12 +12,14 @@ import android.widget.EditText;
 
 import com.traderz.anmolgupta.Content.CustomFields;
 import com.traderz.anmolgupta.Content.UserContent;
+import com.traderz.anmolgupta.Content.UserTest;
 import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
 import com.traderz.anmolgupta.userData.EmailMappingToFullName;
 import com.traderz.anmolgupta.userData.UserConnection;
 import com.traderz.anmolgupta.userData.UserContacts;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -47,6 +49,21 @@ public class LoadingDataTest extends ActionBarActivity {
 
         Button mainAdminPanelButton = (Button) findViewById(R.id.main_admin_panel);
 
+        Button testButton = (Button) findViewById(R.id.test_button);
+
+        Button sqlButton = (Button) findViewById(R.id.sql_database);
+
+
+        sqlButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick( View v ) {
+
+
+
+            }
+        });
+
+
         mainAdminPanelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick( View v ) {
@@ -55,7 +72,14 @@ public class LoadingDataTest extends ActionBarActivity {
         });
 
 
+        testButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick( View v ) {
 
+
+                new SaveTestTask().execute();
+            }
+        });
 
         addMapContentButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,10 +137,17 @@ public class LoadingDataTest extends ActionBarActivity {
 
             Map connections = new HashMap();
 
-            connections.put("productName", params[0]);
-            connections.put("productDescription", params[1]);
-            connections.put("quantity", params[2]);
-            connections.put("Price", params[3]);
+            List<String> list = CustomFields.getColumns();
+
+            for(int i = 0; i< list.size(); i++) {
+
+                connections.put(list.get(i), params[i]);
+            }
+
+//            connections.put("productName", params[0]);
+//            connections.put("productDescription", params[1]);
+//            connections.put("quantity", params[2]);
+//            connections.put("Price", params[3]);
 
             UserContent userContent = new UserContent(params[4],
                     new CustomFields(connections));
@@ -143,6 +174,29 @@ public class LoadingDataTest extends ActionBarActivity {
                     new EmailMappingToFullName(connections));
 
             DynamoDBManager.saveObject(userContent);
+
+            return null;
+        }
+    }
+
+    class SaveTestTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params ) {
+
+            Map<String, Integer> connections = new HashMap<String, Integer>();
+
+            connections.put("one", 1);
+            connections.put("two", 2);
+            connections.put("three", 3);
+            connections.put("four", 4);
+
+
+            UserTest userTest = new UserTest();
+            userTest.setEmail("anmol");
+            userTest.setDemo(connections);
+
+            DynamoDBManager.saveObject(userTest);
 
             return null;
         }

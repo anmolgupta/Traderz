@@ -10,7 +10,9 @@ import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBTable;
 import com.traderz.anmolgupta.userData.EmailMappingToFullNameConverter;
 import com.traderz.anmolgupta.utilities.EnumMarshaller;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -26,6 +28,7 @@ public class UserContent {
     private CustomFields customFields;
     private Visibility visibility;
     private Set<String> contactsList; //depend on visibility.
+    private Buyer buyer;
 
     @DynamoDBAttribute(attributeName = "ContactsList")
     public Set<String> getContactsList() {
@@ -107,6 +110,18 @@ public class UserContent {
         this.visibility = visibleContacts;
     }
 
+    @DynamoDBAttribute(attributeName = "Buyer")
+    @DynamoDBMarshalling(marshallerClass = BuyerConverter.class)
+    public Buyer getBuyer(){
+
+        return buyer;
+    }
+
+    public void setBuyer(Buyer buyer) {
+
+        this.buyer = buyer;
+    }
+
     public UserContent() {
 
     }
@@ -124,16 +139,28 @@ public class UserContent {
 
     }
 
+    public UserContent(String email, String rowID) {
+
+        this.userEmail = email;
+        this.id = rowID;
+    }
+
     public boolean validateObject() {
 
 
-        if(visibility == Visibility.NEGATED || visibility ==Visibility.ALLOWED) {
+        if( visibility == Visibility.NEGATED ||
+                visibility ==Visibility.ALLOWED) {
 
             if(contactsList == null || contactsList.isEmpty()) {
                 return false;
             }
         }
 
+        if( visibility == Visibility.SOLD) {
+
+        }
+
         return true;
     }
+
 }

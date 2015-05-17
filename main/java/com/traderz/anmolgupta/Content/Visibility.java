@@ -5,5 +5,5 @@ package com.traderz.anmolgupta.Content;
  */
 public enum Visibility {
 
-    PRIVATE, PUBLIC, NEGATED, ALLOWED
+    PRIVATE, PUBLIC, NEGATED, ALLOWED, DELETED, SOLD
 }

@@ -14,10 +14,10 @@ package com.traderz.anmolgupta.utilities;
 
 public class DatabaseHelper extends SQLiteOpenHelper
 {
-    private static String TAG = "DatabaseHelper1"; // Tag just for the LogCat window
+    private static String TAG = "DatabaseHelper"; // Tag just for the LogCat window
     //destination path (location) of our database on device
     private static String DB_PATH = "";
-    private static String DB_NAME ="earthcore";// Database name
+    private static String DB_NAME ="mongerooze";// Database name
     private SQLiteDatabase mDataBase;
     private final Context mContext;
 
@@ -97,6 +97,13 @@ public class DatabaseHelper extends SQLiteOpenHelper
             mDataBase.close();
         super.close();
     }
+
+//    public void createTable(String createTableQuery) {
+//
+//        openDataBase();
+//
+//    }
+
 
     @Override
     public void onCreate(SQLiteDatabase arg0) {
