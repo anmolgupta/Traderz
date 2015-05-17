@@ -66,24 +66,6 @@ public class ViewTable extends Fragment {
 
         SharedPreferences settings = getActivity().getSharedPreferences("Traderz", 0);
         privateId = settings.getString("email", "");
-
-        UserContentAdapter userContentAdapter = new UserContentAdapter(context, privateId);
-
-        if(!userContentAdapter.isTableExists()) {
-            new GetData().execute();
-        } else {
-
-            List<UserContent> userContentList = userContentAdapter.getUserContentByQuery("Select * from <tableName> order by "
-                    +UserContentAdapter.UPDATE_TIMESTAMP);
-
-            if(userContentList.isEmpty())
-                new GetData().execute();
-
-            else
-                setAdapter(userContentList);
-        }
-
-
     }
 
     @Override
@@ -122,10 +104,29 @@ public class ViewTable extends Fragment {
             @Override
             public void onRefresh() {
 
+                new GetData().execute();
             }
         });
 
-        setAdapter(null);
+        UserContentAdapter userContentAdapter = new UserContentAdapter(context, privateId);
+
+        if(!userContentAdapter.isTableExists()) {
+            new GetData().execute();
+            setAdapter(null);
+
+        } else {
+
+            List<UserContent> userContentList = userContentAdapter.getUserContentByQuery("Select * from <tableName> order by "
+                    +UserContentAdapter.UPDATE_TIMESTAMP);
+
+            if(userContentList.isEmpty()) {
+                new GetData().execute();
+                setAdapter(null);
+            }
+            else
+                setAdapter(userContentList);
+        }
+
         return view;
     }
 
@@ -135,7 +136,9 @@ public class ViewTable extends Fragment {
 
             userContents = new ArrayList<UserContent>();
 
-        } else if(userContents1 != null) {
+        }
+
+        if(userContents1 != null) {
 
             userContents = new ArrayList<>(userContents1);
         }
@@ -147,7 +150,7 @@ public class ViewTable extends Fragment {
     }
 
     class MyAdapter extends ArrayAdapter<UserContent>{
-        int anmol;
+
         List<UserContent> content;
         LayoutInflater inflator;
         public MyAdapter( Context context, int resource,
@@ -230,7 +233,7 @@ public class ViewTable extends Fragment {
 
                     timestamp = cursor.getLong(0);
 
-                    if(timestamp == null) {
+                    if(timestamp == null || timestamp == 0) {
                         timestamp = new Date().getTime();
                     }
                 }

@@ -98,11 +98,11 @@ public class DatabaseHelper extends SQLiteOpenHelper
         super.close();
     }
 
-    public void createTable(String createTableQuery) {
-
-        openDataBase();
-        mDataBase.execSQL(createTableQuery);
-    }
+//    public void createTable(String createTableQuery) {
+//
+//        openDataBase();
+//
+//    }
 
 
     @Override

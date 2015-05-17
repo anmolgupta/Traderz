@@ -87,7 +87,7 @@ public class UserContentAdapter {
 
     private String getCreateTableQuery() {
 
-        String retStr = "CREATE TABLE  IF NOT EXIST "
+        String retStr = "CREATE TABLE  IF NOT EXISTS "
                 + tableName + " ("+
                 COLUMN_ID + " text primary key, "+
                 USER_ID + " text, "+
@@ -232,7 +232,7 @@ public class UserContentAdapter {
                         null, // g. order by
                         null); // h. limit
 
-        if (cursor != null)
+        if (cursor != null && cursor.getCount() > 0)
             cursor.moveToFirst();
         else
             return null;
@@ -252,9 +252,10 @@ public class UserContentAdapter {
 
         Cursor cursor = mDb.rawQuery(query, null);
 
-        if(cursor == null)
+        if(cursor == null || cursor.getCount() <= 0)
             return userContentList;
 
+        cursor.moveToFirst();
         do {
             userContentList.add(buildUserContent(cursor));
         } while (cursor.moveToNext());
@@ -298,7 +299,9 @@ public class UserContentAdapter {
 
     public void createTable() {
 
-        mDbHelper.createTable(getCreateTableQuery());
+        getWritableDatabase();
+//        mDbHelper.createTable(getCreateTableQuery());
+        mDb.execSQL(getCreateTableQuery());
     }
 
     protected void finalize( ) throws Throwable {
