@@ -35,9 +35,6 @@ import java.util.Map;
  */
 public class AddRowActivity extends Fragment {
 
-    EditText [] columnTitles;
-    EditText [] columnValues;
-
     final String CUSTOM_COLUMN_NAME = "Custom";
     String userId;
     LinkedHashMap<String,String> columnEntity;
@@ -46,20 +43,13 @@ public class AddRowActivity extends Fragment {
     ListView listView;
     List<KeyValue> list;
     UserContent userContent;
+
     @Override
     public void onCreate( Bundle savedInstanceState ) {
 
         super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_add_row);
 
         customColumnCount = 1;
-
-//        columnEntity = new ArrayList<KeyValue>();
-//        columnEntity.add(new KeyValue("Product Name",""));
-//        columnEntity.add(new KeyValue("Product Description",""));
-//        columnEntity.add(new KeyValue("Quantity",""));
-//        columnEntity.add(new KeyValue("Price",""));
-//        columnEntity.add(new KeyValue("Units",""));
 
         SharedPreferences settings = getActivity().getPreferences(0);
         userId = settings.getString("email", "");
@@ -68,10 +58,6 @@ public class AddRowActivity extends Fragment {
 
         for(String field : CustomFields.getColumns())
             columnEntity.put(field,"");
-//        columnEntity.put("Product Description","");
-//        columnEntity.put("Quantity","");
-//        columnEntity.put("Price","");
-//        columnEntity.put("Units","");
 
         definedColumnNumber = columnEntity.size();
 
@@ -112,6 +98,7 @@ public class AddRowActivity extends Fragment {
             public void onClick( View v ) {
 
                 CustomFields customFields = new CustomFields(columnEntity);
+
                 String validString = customFields.isValid();
 
                 if(validString != null) {
@@ -137,9 +124,9 @@ public class AddRowActivity extends Fragment {
 
                 columnEntity = new LinkedHashMap<String,String>();
 
-                for(int i = 0; i < columnTitles.length; i++) {
-                   columnEntity.put(columnTitles[i].getText().toString().trim(),
-                           columnValues[i].getText().toString().trim());
+                for(int i = 0; i < list.size(); i++) {
+                   columnEntity.put(list.get(i).getKey().trim(),
+                           list.get(i).getValue().trim());
                }
 
                 int temp = customColumnCount;
@@ -209,8 +196,6 @@ public class AddRowActivity extends Fragment {
 
             super(context, resource, objects);
             // TODO Auto-generated constructor stub
-            columnTitles = new EditText[objects.size()];
-            columnValues = new EditText[objects.size()];
             inflater = (LayoutInflater)context.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -218,15 +203,29 @@ public class AddRowActivity extends Fragment {
         }
 
         @Override
-        public View getView( final int position, View convertView,
+        public View getView( final int position, View row,
                              ViewGroup parent ) {
 
-            View row = inflater.inflate(R.layout.fragment_add_row, parent, false);
 
-            columnTitles[position] = (EditText) row.findViewById(R.id.column_name);
-            columnTitles[position].setEnabled(false);
+            ListViewHolder viewHolder;
 
-            columnTitles[position].setText(objects.get(position).key);
+            if(row == null){
+                viewHolder = new ListViewHolder();
+
+                row = inflater.inflate(R.layout.fragment_add_row, null);
+                viewHolder.title = (EditText) row.findViewById(R.id.column_name);
+                viewHolder.value = (EditText) row.findViewById(R.id.column_name);
+
+                row.setTag(viewHolder);
+            } else {
+
+                viewHolder = (ListViewHolder) row.getTag();
+            }
+
+            viewHolder.title.setEnabled(false);
+            viewHolder.title.setId(position);
+
+            viewHolder.title.setText(objects.get(position).key);
 
             Button editTextButton = (Button)row.findViewById(R.id.edit_text_button);
             editTextButton.setOnClickListener(new View.OnClickListener() {
@@ -238,7 +237,7 @@ public class AddRowActivity extends Fragment {
                     dialog.setTitle("Change Column Name");
 
                     final EditText text = (EditText) dialog.findViewById(R.id.change);
-                    text.setText(columnTitles[position].getText().toString());
+                    text.setText(objects.get(position).key);
                     text.selectAll();
 
                     Button button = (Button) dialog.findViewById(R.id.change_button);
@@ -277,9 +276,23 @@ public class AddRowActivity extends Fragment {
                 editTextButton.setVisibility(View.INVISIBLE);
             }
 
-            columnValues[position] = (EditText) row.findViewById(R.id.editText);
-            columnValues[position].setText(objects.get(position).value);
+            viewHolder.value.setText(objects.get(position).value);
+            viewHolder.value.setId(position);
+            viewHolder.value.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
+                @Override
+                public void onFocusChange( View v, boolean hasFocus ) {
+
+                    if(!hasFocus) {
+
+                        int position = v.getId();
+                        String enteredPrice = ((EditText) v).getText().toString();
+
+                        objects.get(position).setValue(enteredPrice);
+                    }
+
+                }
+            });
             return row;
         }
 
@@ -296,4 +309,9 @@ public class AddRowActivity extends Fragment {
         }
     }
 
+    class ListViewHolder {
+        EditText title;
+        EditText value;
+
+    }
 }

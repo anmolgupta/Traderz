@@ -1,5 +1,6 @@
 package com.traderz.anmolgupta.userData;
 
+import com.amazonaws.com.google.gson.Gson;
 import com.amazonaws.com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -39,6 +40,4 @@ public class EmailMappingToFullName implements Serializable {
 
         this.map.putAll(map);
     }
-
-
 }

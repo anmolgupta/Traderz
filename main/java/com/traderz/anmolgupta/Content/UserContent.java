@@ -159,6 +159,7 @@ public class UserContent {
         if( visibility == Visibility.SOLD) {
 
         }
+
         return true;
     }
 

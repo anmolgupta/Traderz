@@ -51,6 +51,18 @@ public class LoadingDataTest extends ActionBarActivity {
 
         Button testButton = (Button) findViewById(R.id.test_button);
 
+        Button sqlButton = (Button) findViewById(R.id.sql_database);
+
+
+        sqlButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick( View v ) {
+
+
+
+            }
+        });
+
 
         mainAdminPanelButton.setOnClickListener(new View.OnClickListener() {
             @Override

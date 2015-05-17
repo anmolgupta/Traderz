@@ -11,6 +11,8 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -46,7 +48,13 @@
                   android:id="@+id/value4"/>
         <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
                   android:id="@+id/valueText4"/>
-        <Button
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+    <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Add Content"
@@ -61,11 +69,20 @@
             android:layout_height="wrap_content"
             android:text="Main Admin Panel"
             android:id="@+id/main_admin_panel"/>
+        </LinearLayout>
+
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="AddToTest"
             android:id="@+id/test_button"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="sqlDatabase"
+            android:id="@+id/sql_database"/>
+
     </LinearLayout>
 
 </RelativeLayout>
