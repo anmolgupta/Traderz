@@ -2,50 +2,68 @@ package com.traderz.anmolgupta.userData;
 
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBAttribute;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBHashKey;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBIndexRangeKey;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMarshalling;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBRangeKey;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBTable;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by anmolgupta on 22/04/15.
  */
 @DynamoDBTable(tableName = "UserConnection")
 public class UserConnection {
-    private String email;
-    private EmailMappingToFullName connections;
 
-    @DynamoDBHashKey(attributeName = "Email")
-    public String getEmail() {
+    private String userId;
+    private Long timestamp;
+    private String contactId;
 
-        return email;
+
+    @DynamoDBIndexRangeKey(attributeName = "Timestamp",
+            localSecondaryIndexName="Timestamp-index")
+    public Long getTimestamp() {
+
+        return timestamp;
     }
 
-    public void setEmail( String email ) {
+    public void setTimestamp( Long timestamp ) {
 
-        this.email = email;
+        this.timestamp = timestamp;
     }
 
-    @DynamoDBAttribute(attributeName = "Connections")
-    @DynamoDBMarshalling(marshallerClass = EmailMappingToFullNameConverter.class)
-    public EmailMappingToFullName getContacts() {
+    @DynamoDBRangeKey(attributeName = "ContactId")
+    public String getContactId() {
 
-        return connections;
+        return contactId;
     }
 
-    public void setContacts(EmailMappingToFullName emailMappingToFullName) {
-        this.connections = emailMappingToFullName;
+    public void setContactId( String contactId ) {
+
+        this.contactId = contactId;
+    }
+
+    @DynamoDBHashKey(attributeName = "UserId")
+    public String getUserId() {
+
+        return userId;
+    }
+
+    public void setUserId( String userId ) {
+
+        this.userId = userId;
     }
 
     public UserConnection() {
 
-
-    }
-    public UserConnection(String email, EmailMappingToFullName emailMappingToFullName) {
-
-        setEmail(email);
-        setContacts(emailMappingToFullName);
     }
 
-    public UserConnection(String email) {
-        setEmail(email);
+    public UserConnection(String userId, String contactId) {
+
+        this.userId = userId;
+        this.contactId = contactId;
+        timestamp = new Date().getTime();
     }
 }

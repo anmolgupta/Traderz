@@ -268,6 +268,7 @@ public class AddRowActivity extends Fragment {
                                 return;
                             }
                             objects.get(position).key = text.getText().toString();
+//                            columnTitles[position].setText(text.getText().toString());
                             dialog.dismiss();
 
                         }
