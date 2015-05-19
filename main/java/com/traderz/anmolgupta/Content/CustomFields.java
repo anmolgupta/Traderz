@@ -53,21 +53,37 @@ public class CustomFields implements Cloneable{
 
     public String isValid() {
 
-        List<String> list = getColumns();
+       String field = map.get(CustomFieldsEnum.PRODUCT_NAME.getName());
 
-        for(int i =0; i < list.size(); i++) {
+        if(field == null || field.trim().equals(""))
+            return CustomFieldsEnum.PRODUCT_NAME.getName() + " can't be left blank";
 
-            if( i == 0 ) {
+        field = map.get(CustomFieldsEnum.QUANTITY.getName());
+        if(field != null && !field.trim().equals("")) {
 
-                String productName = map.get(list.get(0));
-                if(productName.trim().equals("")) {
-                    return list.get(0)+" can't be left blank";
-                }
+            try{
+                Double.parseDouble(field);
+            }catch(Exception e) {
+
+                return CustomFieldsEnum.QUANTITY.getName() + " is not numeral";
+
             }
+        }
 
+        field = map.get(CustomFieldsEnum.PRICE.getName());
+        if(field != null && !field.trim().equals("")) {
+
+            try{
+                Double.parseDouble(field);
+            }catch(Exception e) {
+
+                return CustomFieldsEnum.PRICE.getName() + " is not numeral";
+
+            }
         }
 
         return null;
+
     }
 
     public Object clone()throws CloneNotSupportedException{

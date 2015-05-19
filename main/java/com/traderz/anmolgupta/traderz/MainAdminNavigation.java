@@ -41,6 +41,7 @@ public class MainAdminNavigation extends ActionBarActivity
      */
     private CharSequence mTitle;
     private String _email;
+    private String _fullName;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -59,8 +60,7 @@ public class MainAdminNavigation extends ActionBarActivity
 
         SharedPreferences settings = getSharedPreferences("Traderz", 0);
         _email = settings.getString("email", "");
-
-//        new GetConnectionTask().execute(_email);
+        _fullName = settings.getString("fullName", "");
     }
 
 
@@ -97,7 +97,7 @@ public class MainAdminNavigation extends ActionBarActivity
             switch (position) {
                 case 0:  fragment = new ViewTable();
                     args.putString(ViewTable.TITLE, "anmol");
-                    args.putString(ViewTable.ID, "anmol007gupta@gmail.com");
+                    args.putString(ViewTable.ID, _email);
                     break;
                 case 1:  fragment = new AddConnection();
                     break;
@@ -238,30 +238,5 @@ public class MainAdminNavigation extends ActionBarActivity
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
 
-    }
-
-    class GetConnectionTask extends AsyncTask<String, Void, UserConnection> {
-
-        @Override
-        protected UserConnection doInBackground( String... params ) {
-
-            UserConnection userConnection =
-                    DynamoDBManager.loadObject(new UserConnection(params[0]));
-
-            return userConnection;
-        }
-
-        @Override
-        protected void onPostExecute(UserConnection userConnection) {
-
-            if(userConnection != null) {
-
-                List<String> contacts = new ArrayList<String>(
-                        userConnection.getContacts().getMap().values());
-
-//                mNavigationDrawerFragment.setOptions(contacts);
-
-            }
-        }
     }
 }

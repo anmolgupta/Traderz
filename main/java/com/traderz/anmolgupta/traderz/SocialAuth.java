@@ -38,6 +38,7 @@ public class SocialAuth extends ActionBarActivity {
 
     SocialAuthAdapter adapter;
     Social social = null;
+    String fullName;
 
     public SocialAuth(){
 
@@ -84,7 +85,6 @@ public class SocialAuth extends ActionBarActivity {
         });
 
         //LinkedIn
-
         Button linkedInButton = (Button)findViewById(R.id.linkedin_social_auth);
 
         linkedInButton.setOnClickListener(new View.OnClickListener() {
@@ -166,20 +166,23 @@ public class SocialAuth extends ActionBarActivity {
         @Override
         public void onError( SocialAuthError socialAuthError ) {
 
-            //TODO:: navigate to other activity
+            CustomDialogBox.createAlertBox(SocialAuth.this,
+                    "Some Error Occured. Please try in sometime again");
 
         }
 
         @Override
         public void onCancel() {
-            //TODO:: navigate to other activity
 
+            //TODO:: To attach the tutorial to show why is it necessary.
+            CustomDialogBox.createAlertBox(SocialAuth.this, "You Cancelled the Login");
         }
 
         @Override
         public void onBack() {
-            //TODO:: navigate to other activity
 
+            //TODO:: To attach the tutorial to show why is it necessary.
+            CustomDialogBox.createAlertBox(SocialAuth.this, "You Cancelled the Login");
         }
     }
 
@@ -191,16 +194,13 @@ public class SocialAuth extends ActionBarActivity {
 
             if(t != null)
                 new SaveUserInfo().execute(t);
-
-            //TODO:: DO something
-
         }
 
         @Override
         public void onError( SocialAuthError socialAuthError ) {
 
-            //TODO:: Do something
-
+            CustomDialogBox.createAlertBox(SocialAuth.this,
+                    "Some Error Occured. Please try in sometime again");
         }
     }
 
@@ -232,7 +232,7 @@ public class SocialAuth extends ActionBarActivity {
                 if(email == null || email.equals("")) {
                     return null;
                 }
-
+//TODO:: to generate key for user
 //                email = getUserKey(email);
 
                 UserData userData =
@@ -251,6 +251,8 @@ public class SocialAuth extends ActionBarActivity {
                 }
 
                 DynamoDBManager.saveObject(userData);
+
+                fullName = userData.getFullName();
 
                 if(t.getContactInfo() != null) {
 
@@ -291,7 +293,6 @@ public class SocialAuth extends ActionBarActivity {
                     .withHashKeyValues(userContent)
                     .withRangeKeyCondition("Timestamp", rangeKeyCondition)
                     .withConsistentRead(false);
-//                    .withIndexName("UpdatedTimestamp-index");
 
             PaginatedQueryList<UserKey> result =
                     DynamoDBManager.getQueryResult(UserKey.class, queryExpression);
@@ -310,13 +311,14 @@ public class SocialAuth extends ActionBarActivity {
         protected void onPostExecute(String email) {
 
             if(email == null){
-                Toast.makeText(SocialAuth.this, "Please try again", Toast.LENGTH_LONG).show();
+               CustomDialogBox.showToast( SocialAuth.this, "Wrong Email Id entered");
                 return;
             }
 
             SharedPreferences settings = getSharedPreferences("Traderz", 0);
             SharedPreferences.Editor editor = settings.edit();
             editor.putString("email", email);
+            editor.putString("fullName", fullName);
             editor.commit();
 
             Intent intent = new Intent(SocialAuth.this, MainAdminNavigation.class);

@@ -66,4 +66,8 @@ public class UserConnection {
         this.contactId = contactId;
         timestamp = new Date().getTime();
     }
+
+    public UserConnection(String userId) {
+        this.userId = userId;
+    }
 }

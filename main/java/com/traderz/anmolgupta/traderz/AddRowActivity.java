@@ -126,6 +126,7 @@ public class AddRowActivity extends Fragment {
 
                 if(validString != null) {
 
+                    CustomDialogBox.showToast(getActivity(),validString);
                     return;
                 }
 
@@ -254,19 +255,11 @@ public class AddRowActivity extends Fragment {
 
                             if(columnEntity.containsKey(newColumn)) {
 
-                                AlertDialog.Builder builder =
-                                        new AlertDialog.Builder(getActivity());
-                                builder.setMessage("The Column Name is Already Present")
-                                        .setCancelable(false)
-                                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                dialog.cancel();
-                                            }
-                                        });
-                                builder.create().show();
-
+                                CustomDialogBox.createAlertBox(getActivity(),
+                                        "The Column Name is Already Present");
                                 return;
                             }
+
                             objects.get(position).key = text.getText().toString();
 //                            columnTitles[position].setText(text.getText().toString());
                             dialog.dismiss();

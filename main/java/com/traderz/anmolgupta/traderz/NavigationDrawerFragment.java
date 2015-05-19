@@ -25,14 +25,23 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.amazonaws.com.google.gson.Gson;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBQueryExpression;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedQueryList;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
+import com.amazonaws.services.dynamodbv2.model.Condition;
+import com.traderz.anmolgupta.Content.UserContent;
 import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
 import com.traderz.anmolgupta.userData.EmailMappingToFullName;
 import com.traderz.anmolgupta.userData.EmailMappingToFullNameConverter;
 import com.traderz.anmolgupta.userData.UserConnection;
+import com.traderz.anmolgupta.userData.UserData;
 import com.traderz.anmolgupta.utilities.GenericConverters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -74,16 +83,16 @@ public class NavigationDrawerFragment extends Fragment {
     private List<String> options;
     private Context context;
 
-    private UserConnection userConn;
 
+    Map<String,String> contactsMap;
     public NavigationDrawerFragment() {
 
     }
 
-    public void setOptions() {
+    public void setOptions(Map<String,String> map) {
 
         ArrayList<String> dummy = new ArrayList<String>(options);
-        dummy.addAll(userConn.getContacts().getMap().keySet());
+        dummy.addAll(map.values());
 
         mDrawerListView.setAdapter(new ArrayAdapter<String>(
                 getActionBar().getThemedContext(),
@@ -94,8 +103,8 @@ public class NavigationDrawerFragment extends Fragment {
 
     public String getValue( String key ) {
 
-        if(userConn != null)
-            return userConn.getContacts().getMap().get(key);
+        if(contactsMap != null)
+            return contactsMap.get(key);
 
         return "";
     }
@@ -117,7 +126,9 @@ public class NavigationDrawerFragment extends Fragment {
         options = Arrays.asList(initial);
         // Read in the flag indicating whether or not the user has demonstrated awareness of the
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
+
         context = getActivity();
+
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mUserLearnedDrawer = sp.getBoolean(PREF_USER_LEARNED_DRAWER, false);
 
@@ -157,6 +168,7 @@ public class NavigationDrawerFragment extends Fragment {
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
                 options));
+
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
 
         SharedPreferences settings = getActivity().getSharedPreferences("Traderz", 0);
@@ -166,13 +178,9 @@ public class NavigationDrawerFragment extends Fragment {
             new GetConnectionTask().execute(settings.getString("email",""));
         }else {
 
-            EmailMappingToFullName emailMappingToFullName =
-                    new EmailMappingToFullName(
-                            GenericConverters.convertStringToObject(privateMap, Map.class));
-
-            userConn = new UserConnection(settings.getString("email",""),
-                    emailMappingToFullName);
-            setOptions();
+            Map<String,String> map =
+                            GenericConverters.convertStringToObject(privateMap, Map.class);
+            setOptions(map);
         }
 
         return mDrawerListView;
@@ -367,35 +375,53 @@ public class NavigationDrawerFragment extends Fragment {
         void onNavigationDrawerItemSelected( int position );
     }
 
-    class GetConnectionTask extends AsyncTask<String, Void, UserConnection> {
+    class GetConnectionTask extends AsyncTask<String, Void, Map<String,String>> {
 
         @Override
-        protected UserConnection doInBackground( String... params ) {
+        protected Map<String,String> doInBackground( String... params ) {
+
+            Long timestamp = new Date().getTime();
+
+            Condition rangeKeyCondition = new Condition()
+                    .withComparisonOperator(ComparisonOperator.LT.toString())
+                    .withAttributeValueList(new AttributeValue().withN("" + timestamp));
+
+            DynamoDBQueryExpression queryExpression = new DynamoDBQueryExpression()
+                    .withHashKeyValues(new UserConnection(params[0]))
+                    .withRangeKeyCondition("Timestamp", rangeKeyCondition)
+                    .withConsistentRead(false);
+
+            PaginatedQueryList<UserConnection> result =
+                    DynamoDBManager.getQueryResult(UserConnection.class, queryExpression);
 
 
-            UserConnection userConnection =
-                    DynamoDBManager.loadObject(new UserConnection(params[0]));
+            Map<String,String> map = new HashMap<>();
 
-            return userConnection;
+            for(UserConnection userConnection: result) {
+
+                UserData contactData = new UserData(userConnection.getContactId());
+
+                contactData = DynamoDBManager.loadObject(contactData);
+
+                map.put(contactData.getEmail(), contactData.getFullName());
+            }
+
+            return map;
         }
 
         @Override
-        protected void onPostExecute(UserConnection userConnection) {
+        protected void onPostExecute(Map<String,String> map) {
 
-            if(userConnection != null) {
+            if(!map.isEmpty()) {
 
                 SharedPreferences settings = context.getSharedPreferences("Traderz", 0);
 
-                EmailMappingToFullNameConverter emailMappingToFullNameConverter =
-                        new EmailMappingToFullNameConverter();
-
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("userConnection",
-                        GenericConverters.convertObjectToString(userConnection.getContacts().getMap()));
+                        GenericConverters.convertObjectToString(map));
                 editor.commit();
 
-                userConn = userConnection;
-                setOptions();
+                setOptions(map);
             }
         }
     }

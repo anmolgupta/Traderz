@@ -132,11 +132,11 @@ public class ViewTable extends Fragment {
 
     public void setAdapter(List<UserContent> userContents1) {
 
-        if(userContents1 == null && userContents == null) {
-
-            userContents = new ArrayList<UserContent>();
-
-        }
+//        if(userContents1 == null && userContents == null) {
+//
+//            userContents = new ArrayList<UserContent>();
+//
+//        }
 
         if(userContents1 != null) {
 

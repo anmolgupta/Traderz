@@ -37,14 +37,22 @@ public class  AddConnection extends Fragment {
     String privateId;
     Context context;
 
+    EditText connectionUsername;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        /* Updating the action bar title */
+//        getActivity().getActionBar().setTitle(title);
 
+        /* Getting the WebView target url */
+//        String url = getArguments().getString("url");
+
+		/* Creating view corresponding to the fragment */
         View v = inflater.inflate(R.layout.activity_add_connection, container, false);
 
 		/* Initializing and loading url in WebView */
-        final EditText connectionUsername = (EditText) v.findViewById(R.id.connectionUserName);
+        connectionUsername = (EditText) v.findViewById(R.id.connectionUserName);
 
         final Button connectionButton = (Button) v.findViewById(R.id.connectionButton);
 
@@ -127,10 +135,15 @@ public class  AddConnection extends Fragment {
 
             switch(contactStatus) {
                 case CONTACT_ADDED:
+                    CustomDialogBox.showToast(context, "Contact Added Succesfully");
+                    connectionUsername.setText("");
                     break;
                 case CONTACT_ALREADY_PRESENT:
+                    CustomDialogBox.createAlertBox(context, "Contact Already Added");
                     break;
                 case CONTACT_NOT_PRESENT:
+                    CustomDialogBox.createAlertBox(context, "Contact Not Present");
+                    //TODO:: notify user to invite for the app
                     break;
 
             }
