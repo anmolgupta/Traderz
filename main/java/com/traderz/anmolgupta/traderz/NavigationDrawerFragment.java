@@ -92,7 +92,7 @@ public class NavigationDrawerFragment extends Fragment {
     public void setOptions(Map<String,String> map) {
 
         ArrayList<String> dummy = new ArrayList<String>(options);
-        dummy.addAll(map.values());
+        dummy.addAll(map.keySet());
 
         mDrawerListView.setAdapter(new ArrayAdapter<String>(
                 getActionBar().getThemedContext(),

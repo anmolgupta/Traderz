@@ -28,7 +28,7 @@
         <activity
             android:name=".MainAdminNavigation"
             android:label="@string/title_activity_main_admin_navigation"
-            android:windowSoftInputMode="adjustPan">
+            android:windowSoftInputMode="adjustPan" >
         </activity>
         <activity
             android:name=".SettingsActivity"
@@ -46,6 +46,7 @@
             android:name=".EditTextActivity"
             android:label="@string/title_activity_edit_text" >
         </activity>
+
     </application>
 
 </manifest>

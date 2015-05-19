@@ -189,7 +189,7 @@ public class MainAdminNavigation extends ActionBarActivity
     @Override
     public void onAddRowInTableCallbacks() {
 
-        Fragment fragment = new AddRowActivity();
+        Fragment fragment = new DummyAddRowActivity();
         setFragment(fragment);
 
     }

@@ -170,10 +170,10 @@ public class LoadingDataTest extends ActionBarActivity {
             connections.put("three", params[2]);
             connections.put("four", params[3]);
 
-            UserConnection userContent = new UserConnection(params[4],
-                    new EmailMappingToFullName(connections));
-
-            DynamoDBManager.saveObject(userContent);
+//            UserConnection userContent = new UserConnection(params[4],
+//                    new EmailMappingToFullName(connections));
+//
+//            DynamoDBManager.saveObject(userContent);
 
             return null;
         }

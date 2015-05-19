@@ -110,12 +110,6 @@ public class ViewTable extends Fragment {
 
         UserContentAdapter userContentAdapter = new UserContentAdapter(context, privateId);
 
-        if(!userContentAdapter.isTableExists()) {
-            new GetData().execute();
-            setAdapter(null);
-
-        } else {
-
             List<UserContent> userContentList = userContentAdapter.getUserContentByQuery("Select * from <tableName> order by "
                     +UserContentAdapter.UPDATE_TIMESTAMP);
 
@@ -125,18 +119,11 @@ public class ViewTable extends Fragment {
             }
             else
                 setAdapter(userContentList);
-        }
 
         return view;
     }
 
     public void setAdapter(List<UserContent> userContents1) {
-
-//        if(userContents1 == null && userContents == null) {
-//
-//            userContents = new ArrayList<UserContent>();
-//
-//        }
 
         if(userContents1 != null) {
 
@@ -215,13 +202,8 @@ public class ViewTable extends Fragment {
 
             UserContentAdapter userContentAdapter = new UserContentAdapter(context,privateId);
 
-            Condition rangeKeyCondition = null;
-
-            boolean tableExists = userContentAdapter.isTableExists();
-
-            if(tableExists) {
-
                 Long timestamp = null;
+
                 Cursor cursor =
                         userContentAdapter.fireRandomQuery("select max("+ UserContentAdapter.UPDATE_TIMESTAMP+") from <tableName>");
 
@@ -238,18 +220,10 @@ public class ViewTable extends Fragment {
                     }
                 }
 
-                rangeKeyCondition = new Condition()
-                        .withComparisonOperator(ComparisonOperator.LT.toString())
-                        .withAttributeValueList(new AttributeValue().withN("" + timestamp));
-            } else {
-                Long timestamp = new Date().getTime();
-
-                rangeKeyCondition = new Condition()
+                Condition rangeKeyCondition = new Condition()
                         .withComparisonOperator(ComparisonOperator.LT.toString())
                         .withAttributeValueList(new AttributeValue().withN("" + timestamp));
 
-
-            }
 
             DynamoDBQueryExpression queryExpression = new DynamoDBQueryExpression()
                     .withHashKeyValues(userContent)
@@ -270,10 +244,6 @@ public class ViewTable extends Fragment {
             if(userConnection != null) {
 
                 UserContentAdapter userContentAdapter = new UserContentAdapter(context,privateId);
-
-                if(!userContentAdapter.isTableExists()) {
-                    userContentAdapter.createTable();
-                }
 
                 for(UserContent userContent : userConnection) {
 
