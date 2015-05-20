@@ -42,7 +42,9 @@ public class ViewTable extends Fragment {
     private Context context;
     private ListView listView;
 
-    private String privateId;
+    private String privateId,importedRowId,importedId;
+
+    boolean originalUser = false;
 
     @Override
     public void onAttach( Activity activity ) {
@@ -66,6 +68,13 @@ public class ViewTable extends Fragment {
 
         SharedPreferences settings = getActivity().getSharedPreferences("Traderz", 0);
         privateId = settings.getString("email", "");
+
+        importedRowId = getArguments().getString(TITLE);
+        importedId = getArguments().getString(ID);
+
+        if(importedId.equals(privateId))
+            originalUser = true;
+
     }
 
     @Override
@@ -97,6 +106,11 @@ public class ViewTable extends Fragment {
                 }
         });
 
+        if(!originalUser){
+            addRow.setEnabled(false);
+            addRow.setVisibility(View.INVISIBLE);
+        }
+
         SwipeRefreshLayout mSwipeRefreshLayout = (SwipeRefreshLayout)
                 view.findViewById(R.id.activity_main_swipe_refresh_layout);
 
@@ -108,7 +122,7 @@ public class ViewTable extends Fragment {
             }
         });
 
-        UserContentAdapter userContentAdapter = new UserContentAdapter(context, privateId);
+        UserContentAdapter userContentAdapter = new UserContentAdapter(context, importedId);
 
             List<UserContent> userContentList = userContentAdapter.getUserContentByQuery("Select * from <tableName> order by "
                     +UserContentAdapter.UPDATE_TIMESTAMP);
@@ -198,9 +212,9 @@ public class ViewTable extends Fragment {
         protected PaginatedQueryList<UserContent> doInBackground( Void... params ) {
 
             UserContent userContent = new UserContent();
-            userContent.setUserEmail(privateId);
+            userContent.setUserEmail(importedId);
 
-            UserContentAdapter userContentAdapter = new UserContentAdapter(context,privateId);
+            UserContentAdapter userContentAdapter = new UserContentAdapter(context,importedId);
 
                 Long timestamp = null;
 
@@ -243,7 +257,7 @@ public class ViewTable extends Fragment {
             List<UserContent> userContents1 = new ArrayList<>();
             if(userConnection != null) {
 
-                UserContentAdapter userContentAdapter = new UserContentAdapter(context,privateId);
+                UserContentAdapter userContentAdapter = new UserContentAdapter(context,importedId);
 
                 for(UserContent userContent : userConnection) {
 

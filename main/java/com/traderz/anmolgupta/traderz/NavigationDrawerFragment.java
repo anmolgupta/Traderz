@@ -83,7 +83,7 @@ public class NavigationDrawerFragment extends Fragment {
     private List<String> options;
     private Context context;
 
-
+    ArrayList<String> dummy;
     Map<String,String> contactsMap;
     public NavigationDrawerFragment() {
 
@@ -91,7 +91,9 @@ public class NavigationDrawerFragment extends Fragment {
 
     public void setOptions(Map<String,String> map) {
 
-        ArrayList<String> dummy = new ArrayList<String>(options);
+        contactsMap = map;
+
+        dummy = new ArrayList<String>(options);
         dummy.addAll(map.keySet());
 
         mDrawerListView.setAdapter(new ArrayAdapter<String>(
@@ -101,12 +103,15 @@ public class NavigationDrawerFragment extends Fragment {
                 dummy));
     }
 
-    public String getValue( String key ) {
+    public  String getKey( int pos ) {
 
-        if(contactsMap != null)
-            return contactsMap.get(key);
+        return dummy.get(pos);
 
-        return "";
+    }
+
+    public String getValue( int pos ){
+        String key = dummy.get(pos);
+        return contactsMap.get(key);
     }
 
     public int getStaticComponentCount() {
@@ -170,18 +175,6 @@ public class NavigationDrawerFragment extends Fragment {
                 options));
 
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
-
-        SharedPreferences settings = getActivity().getSharedPreferences("Traderz", 0);
-        String privateMap = settings.getString("userConnection", "");
-
-        if(privateMap ==null || privateMap.equals("")) {
-            new GetConnectionTask().execute(settings.getString("email",""));
-        }else {
-
-            Map<String,String> map =
-                            GenericConverters.convertStringToObject(privateMap, Map.class);
-            setOptions(map);
-        }
 
         return mDrawerListView;
     }
@@ -373,56 +366,5 @@ public class NavigationDrawerFragment extends Fragment {
          * Called when an item in the navigation drawer is selected.
          */
         void onNavigationDrawerItemSelected( int position );
-    }
-
-    class GetConnectionTask extends AsyncTask<String, Void, Map<String,String>> {
-
-        @Override
-        protected Map<String,String> doInBackground( String... params ) {
-
-            Long timestamp = new Date().getTime();
-
-            Condition rangeKeyCondition = new Condition()
-                    .withComparisonOperator(ComparisonOperator.LT.toString())
-                    .withAttributeValueList(new AttributeValue().withN("" + timestamp));
-
-            DynamoDBQueryExpression queryExpression = new DynamoDBQueryExpression()
-                    .withHashKeyValues(new UserConnection(params[0]))
-                    .withRangeKeyCondition("Timestamp", rangeKeyCondition)
-                    .withConsistentRead(false);
-
-            PaginatedQueryList<UserConnection> result =
-                    DynamoDBManager.getQueryResult(UserConnection.class, queryExpression);
-
-
-            Map<String,String> map = new HashMap<>();
-
-            for(UserConnection userConnection: result) {
-
-                UserData contactData = new UserData(userConnection.getContactId());
-
-                contactData = DynamoDBManager.loadObject(contactData);
-
-                map.put(contactData.getEmail(), contactData.getFullName());
-            }
-
-            return map;
-        }
-
-        @Override
-        protected void onPostExecute(Map<String,String> map) {
-
-            if(!map.isEmpty()) {
-
-                SharedPreferences settings = context.getSharedPreferences("Traderz", 0);
-
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putString("userConnection",
-                        GenericConverters.convertObjectToString(map));
-                editor.commit();
-
-                setOptions(map);
-            }
-        }
     }
 }

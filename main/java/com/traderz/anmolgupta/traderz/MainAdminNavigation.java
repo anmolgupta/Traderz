@@ -17,11 +17,19 @@ import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.ArrayAdapter;
 
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBQueryExpression;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedQueryList;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
+import com.amazonaws.services.dynamodbv2.model.Condition;
 import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
 import com.traderz.anmolgupta.userData.UserConnection;
 import com.traderz.anmolgupta.userData.UserContacts;
+import com.traderz.anmolgupta.userData.UserData;
+import com.traderz.anmolgupta.utilities.GenericConverters;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +69,17 @@ public class MainAdminNavigation extends ActionBarActivity
         SharedPreferences settings = getSharedPreferences("Traderz", 0);
         _email = settings.getString("email", "");
         _fullName = settings.getString("fullName", "");
+
+        String privateMap = settings.getString("userConnection", "");
+
+        if(privateMap ==null || privateMap.equals("")) {
+            new GetConnectionTask().execute(settings.getString("email",""));
+        }else {
+
+            Map<String,String> map =
+                    GenericConverters.convertStringToObject(privateMap, Map.class);
+            mNavigationDrawerFragment.setOptions(map);
+        }
     }
 
 
@@ -95,16 +114,17 @@ public class MainAdminNavigation extends ActionBarActivity
             Bundle args = new Bundle();
 
             switch (position) {
-                case 0:  fragment = new ViewTable();
-                    args.putString(ViewTable.TITLE, "anmol");
+                case 1:  fragment = new ViewTable();
+                    args.putString(ViewTable.TITLE, _fullName);
                     args.putString(ViewTable.ID, _email);
                     break;
-                case 1:  fragment = new AddConnection();
+                case 0:  fragment = new AddConnection();
                     break;
                 default:
                     fragment = new ViewTable();
-                    args.putString(ViewTable.TITLE, "anmol");
-                    args.putString(ViewTable.ID, "anmol007gupta@gmail.com");
+
+                    args.putString(ViewTable.TITLE, mNavigationDrawerFragment.getValue(position));
+                    args.putString(ViewTable.ID, mNavigationDrawerFragment.getKey(position));
                     break;
             }
 
@@ -238,5 +258,57 @@ public class MainAdminNavigation extends ActionBarActivity
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
 
+    }
+
+    class GetConnectionTask extends AsyncTask<String, Void, Map<String,String>> {
+
+        @Override
+        protected Map<String,String> doInBackground( String... params ) {
+
+            Long timestamp = new Date().getTime();
+
+            Condition rangeKeyCondition = new Condition()
+                    .withComparisonOperator(ComparisonOperator.LT.toString())
+                    .withAttributeValueList(new AttributeValue().withN("" + timestamp));
+
+            DynamoDBQueryExpression queryExpression = new DynamoDBQueryExpression()
+                    .withHashKeyValues(new UserConnection(params[0]))
+                    .withRangeKeyCondition("Timestamp", rangeKeyCondition)
+                    .withConsistentRead(false);
+
+            PaginatedQueryList<UserConnection> result =
+                    DynamoDBManager.getQueryResult(UserConnection.class, queryExpression);
+
+
+            Map<String,String> map = new HashMap<>();
+
+            if(result != null) {
+                for ( UserConnection userConnection : result ) {
+
+                    UserData contactData = new UserData(userConnection.getContactId());
+
+                    contactData = DynamoDBManager.loadObject(contactData);
+
+                    map.put(contactData.getEmail(), contactData.getFullName());
+                }
+            }
+            return map;
+        }
+
+        @Override
+        protected void onPostExecute(Map<String,String> map) {
+
+            if(!map.isEmpty()) {
+
+                SharedPreferences settings = getSharedPreferences("Traderz", 0);
+
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putString("userConnection",
+                        GenericConverters.convertObjectToString(map));
+                editor.commit();
+
+                mNavigationDrawerFragment.setOptions(map);
+            }
+        }
     }
 }
