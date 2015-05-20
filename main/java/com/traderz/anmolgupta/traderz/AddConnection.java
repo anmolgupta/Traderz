@@ -1,6 +1,7 @@
 package com.traderz.anmolgupta.traderz;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -39,6 +40,21 @@ public class  AddConnection extends Fragment {
 
     EditText connectionUsername;
 
+    ProgressDialog pd;
+
+    AddConnectionCallback mCallbacks;
+
+    @Override
+    public void onAttach( Activity activity ) {
+
+        super.onAttach(activity);
+        try {
+            mCallbacks = (AddConnectionCallback) activity;
+        } catch ( ClassCastException e ) {
+            throw new ClassCastException("Activity must implement NavigationDrawerCallbacks.");
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -61,16 +77,34 @@ public class  AddConnection extends Fragment {
         SharedPreferences settings = getActivity().getSharedPreferences("Traderz", 0);
         privateId = settings.getString("email", "");
 
+        pd=new ProgressDialog(context);
+        pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        pd.setMessage("Loading");
+        pd.setCancelable(false);
+        pd.setIndeterminate(true);
+
         connectionButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick( View v ) {
 
                 contactId = connectionUsername.getText().toString();
+                pd.show();
                 new AddConnectionTask().execute();
             }
         });
+
+
+
         return v;
+    }
+
+    public static interface AddConnectionCallback {
+
+        /**
+         * Called when an item in the navigation drawer is selected.
+         */
+        void refreshNavigationPanel();
     }
 
     enum ContactStatus {CONTACT_NOT_PRESENT, CONTACT_ALREADY_PRESENT,CONTACT_ADDED};
@@ -133,9 +167,11 @@ public class  AddConnection extends Fragment {
 
         protected void onPostExecute(ContactStatus contactStatus) {
 
+            pd.cancel();
             switch(contactStatus) {
                 case CONTACT_ADDED:
                     CustomDialogBox.showToast(context, "Contact Added Succesfully");
+                    mCallbacks.refreshNavigationPanel();
                     connectionUsername.setText("");
                     break;
                 case CONTACT_ALREADY_PRESENT:

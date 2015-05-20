@@ -1,6 +1,7 @@
 package com.traderz.anmolgupta.traderz;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -46,6 +47,9 @@ public class ViewTable extends Fragment {
 
     boolean originalUser = false;
 
+    ProgressDialog pd;
+
+    SwipeRefreshLayout mSwipeRefreshLayout;
     @Override
     public void onAttach( Activity activity ) {
 
@@ -74,6 +78,12 @@ public class ViewTable extends Fragment {
 
         if(importedId.equals(privateId))
             originalUser = true;
+
+        pd=new ProgressDialog(context);
+        pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        pd.setMessage("Loading");
+        pd.setCancelable(false);
+        pd.setIndeterminate(true);
 
     }
 
@@ -111,7 +121,7 @@ public class ViewTable extends Fragment {
             addRow.setVisibility(View.INVISIBLE);
         }
 
-        SwipeRefreshLayout mSwipeRefreshLayout = (SwipeRefreshLayout)
+        mSwipeRefreshLayout = (SwipeRefreshLayout)
                 view.findViewById(R.id.activity_main_swipe_refresh_layout);
 
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -128,6 +138,7 @@ public class ViewTable extends Fragment {
                     +UserContentAdapter.UPDATE_TIMESTAMP);
 
             if(userContentList.isEmpty()) {
+                pd.show();
                 new GetData().execute();
                 setAdapter(null);
             }
@@ -141,7 +152,7 @@ public class ViewTable extends Fragment {
 
         if(userContents1 != null) {
 
-            userContents = new ArrayList<>(userContents1);
+            userContents.addAll(userContents1);
         }
 
 
@@ -221,22 +232,34 @@ public class ViewTable extends Fragment {
                 Cursor cursor =
                         userContentAdapter.fireRandomQuery("select max("+ UserContentAdapter.UPDATE_TIMESTAMP+") from <tableName>");
 
+                Condition rangeKeyCondition = null;
                 if(cursor == null) {
 
                     timestamp = new Date().getTime();
+                    rangeKeyCondition = new Condition()
+                            .withComparisonOperator(ComparisonOperator.LT.toString())
+                            .withAttributeValueList(new AttributeValue().withN("" + timestamp));
 
                 }else{
 
                     timestamp = cursor.getLong(0);
 
                     if(timestamp == null || timestamp == 0) {
+
                         timestamp = new Date().getTime();
+                        rangeKeyCondition = new Condition()
+                                .withComparisonOperator(ComparisonOperator.LT.toString())
+                                .withAttributeValueList(new AttributeValue().withN("" + timestamp));
+
+                    }else {
+
+                        rangeKeyCondition = new Condition()
+                                .withComparisonOperator(ComparisonOperator.GT.toString())
+                                .withAttributeValueList(new AttributeValue().withN("" + timestamp));
                     }
                 }
 
-                Condition rangeKeyCondition = new Condition()
-                        .withComparisonOperator(ComparisonOperator.LT.toString())
-                        .withAttributeValueList(new AttributeValue().withN("" + timestamp));
+
 
 
             DynamoDBQueryExpression queryExpression = new DynamoDBQueryExpression()
@@ -253,6 +276,12 @@ public class ViewTable extends Fragment {
         @Override
         protected void onPostExecute(PaginatedQueryList<UserContent> userConnection) {
 
+            if(pd.isShowing())
+                pd.cancel();
+
+            if(mSwipeRefreshLayout != null && mSwipeRefreshLayout.isRefreshing()) {
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
 
             List<UserContent> userContents1 = new ArrayList<>();
             if(userConnection != null) {

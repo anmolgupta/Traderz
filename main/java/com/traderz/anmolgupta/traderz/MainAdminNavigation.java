@@ -37,7 +37,7 @@ import java.util.Map;
 
 public class MainAdminNavigation extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
-        ViewTable.ViewTableCallbacks {
+        ViewTable.ViewTableCallbacks, AddConnection.AddConnectionCallback {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -76,9 +76,8 @@ public class MainAdminNavigation extends ActionBarActivity
             new GetConnectionTask().execute(settings.getString("email",""));
         }else {
 
-            Map<String,String> map =
-                    GenericConverters.convertStringToObject(privateMap, Map.class);
-            mNavigationDrawerFragment.setOptions(map);
+            refreshNavigationPanel();
+
         }
     }
 
@@ -214,6 +213,20 @@ public class MainAdminNavigation extends ActionBarActivity
 
     }
 
+    @Override
+    public void refreshNavigationPanel() {
+
+        SharedPreferences settings = getSharedPreferences("Traderz", 0);
+
+        String defaultMap = settings.getString("userConnection", "");
+
+        if(!defaultMap.equals("")) {
+
+            Map<String, String> map = GenericConverters.convertStringToObject(defaultMap, Map.class);
+            mNavigationDrawerFragment.setOptions(map);
+        }
+    }
+
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -303,11 +316,23 @@ public class MainAdminNavigation extends ActionBarActivity
                 SharedPreferences settings = getSharedPreferences("Traderz", 0);
 
                 SharedPreferences.Editor editor = settings.edit();
+
+                String defaultMap = settings.getString("userConnection", "");
+
+                if(!defaultMap.equals("")) {
+
+                    Map<String,String> tempMap = GenericConverters.convertStringToObject(defaultMap, Map.class);
+                    map.putAll(tempMap);
+
+
+                }
+
                 editor.putString("userConnection",
                         GenericConverters.convertObjectToString(map));
+
                 editor.commit();
 
-                mNavigationDrawerFragment.setOptions(map);
+                refreshNavigationPanel();
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.traderz.anmolgupta.traderz;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -40,6 +41,7 @@ public class SocialAuth extends ActionBarActivity {
     Social social = null;
     String fullName;
 
+    ProgressDialog pd;
     public SocialAuth(){
 
     }
@@ -49,6 +51,12 @@ public class SocialAuth extends ActionBarActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_social_auth);
+
+        pd=new ProgressDialog(SocialAuth.this);
+        pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        pd.setMessage("Loading");
+        pd.setCancelable(false);
+        pd.setIndeterminate(true);
 
         adapter = new SocialAuthAdapter(new ResponseListener());
 
@@ -192,8 +200,10 @@ public class SocialAuth extends ActionBarActivity {
         @Override
         public void onExecute( String s, Profile t ) {
 
-            if(t != null)
+            if(t != null) {
+                pd.show();
                 new SaveUserInfo().execute(t);
+            }
         }
 
         @Override
@@ -321,6 +331,7 @@ public class SocialAuth extends ActionBarActivity {
             editor.putString("fullName", fullName);
             editor.commit();
 
+            pd.cancel();
             Intent intent = new Intent(SocialAuth.this, MainAdminNavigation.class);
             intent.putExtra("email", email);
             startActivity(intent);
