@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,7 @@ import com.traderz.anmolgupta.Content.UserContent;
 import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
 import com.traderz.anmolgupta.SQLLiteClasses.UserContentAdapter;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -94,6 +96,15 @@ public class DummyViewEditRowActivity extends Fragment {
         editText5 = (EditText) view.findViewById(R.id.editText5);
         editText6 = (EditText) view.findViewById(R.id.editText6);
 
+        Map<String,String> map = userContent.getCustomFields().getMap();
+
+        editText2.setText(map.get(CustomFieldsEnum.PRODUCT_NAME.getName()));
+        editText3.setText(map.get(CustomFieldsEnum.PRODUCT_DESCRIPTION.getName()));
+        editText4.setText(map.get(CustomFieldsEnum.QUANTITY.getName()));
+        editText5.setText(map.get(CustomFieldsEnum.PRICE.getName()));
+        editText6.setText(map.get(CustomFieldsEnum.UNITS.getName()));
+
+
         Button button = (Button) view.findViewById(R.id.add_row);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,12 +151,9 @@ public class DummyViewEditRowActivity extends Fragment {
                 return validateString;
 
             }
-            
-            UserContent userContent =
-                    new UserContent(privateId, customFields);
 
-
-            userContent.setId(importedRowId);
+            userContent.setCustomFields(customFields);
+            userContent.setUpdatedTimestamp(new Date().getTime());
 
             DynamoDBManager.saveObject(userContent);
 
@@ -165,10 +173,11 @@ public class DummyViewEditRowActivity extends Fragment {
                 CustomDialogBox.showToast(context, "Error: "+str);
 
             }else {
-                CustomDialogBox.showToast(context, "Added successfully");
+                CustomDialogBox.showToast(context, "Updated successfully");
             }
 
 
         }
     }
+
 }

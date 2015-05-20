@@ -178,7 +178,7 @@ public class MainAdminNavigation extends ActionBarActivity
         args.putString(ViewEditRowActivity.ROW_ID, rowId);
         args.putSerializable(ViewEditRowActivity.MAP,  map);
 
-        Fragment fragment = new ViewEditRowActivity();
+        Fragment fragment = new DummyViewEditRowActivity();
         fragment.setArguments(args);
 
         setFragment(fragment);
