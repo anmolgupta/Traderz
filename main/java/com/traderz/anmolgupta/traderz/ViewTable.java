@@ -1,6 +1,7 @@
 package com.traderz.anmolgupta.traderz;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -42,8 +43,13 @@ public class ViewTable extends Fragment {
     private Context context;
     private ListView listView;
 
-    private String privateId;
+    private String privateId,importedRowId,importedId;
 
+    boolean originalUser = false;
+
+    ProgressDialog pd;
+
+    SwipeRefreshLayout mSwipeRefreshLayout;
     @Override
     public void onAttach( Activity activity ) {
 
@@ -66,6 +72,19 @@ public class ViewTable extends Fragment {
 
         SharedPreferences settings = getActivity().getSharedPreferences("Traderz", 0);
         privateId = settings.getString("email", "");
+
+        importedRowId = getArguments().getString(TITLE);
+        importedId = getArguments().getString(ID);
+
+        if(importedId.equals(privateId))
+            originalUser = true;
+
+        pd=new ProgressDialog(context);
+        pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        pd.setMessage("Loading");
+        pd.setCancelable(false);
+        pd.setIndeterminate(true);
+
     }
 
     @Override
@@ -97,7 +116,12 @@ public class ViewTable extends Fragment {
                 }
         });
 
-        SwipeRefreshLayout mSwipeRefreshLayout = (SwipeRefreshLayout)
+        if(!originalUser){
+            addRow.setEnabled(false);
+            addRow.setVisibility(View.INVISIBLE);
+        }
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout)
                 view.findViewById(R.id.activity_main_swipe_refresh_layout);
 
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -108,39 +132,27 @@ public class ViewTable extends Fragment {
             }
         });
 
-        UserContentAdapter userContentAdapter = new UserContentAdapter(context, privateId);
-
-        if(!userContentAdapter.isTableExists()) {
-            new GetData().execute();
-            setAdapter(null);
-
-        } else {
+        UserContentAdapter userContentAdapter = new UserContentAdapter(context, importedId);
 
             List<UserContent> userContentList = userContentAdapter.getUserContentByQuery("Select * from <tableName> order by "
                     +UserContentAdapter.UPDATE_TIMESTAMP);
 
             if(userContentList.isEmpty()) {
+                pd.show();
                 new GetData().execute();
                 setAdapter(null);
             }
             else
                 setAdapter(userContentList);
-        }
 
         return view;
     }
 
     public void setAdapter(List<UserContent> userContents1) {
 
-        if(userContents1 == null && userContents == null) {
-
-            userContents = new ArrayList<UserContent>();
-
-        }
-
         if(userContents1 != null) {
 
-            userContents = new ArrayList<>(userContents1);
+            userContents.addAll(userContents1);
         }
 
 
@@ -211,45 +223,44 @@ public class ViewTable extends Fragment {
         protected PaginatedQueryList<UserContent> doInBackground( Void... params ) {
 
             UserContent userContent = new UserContent();
-            userContent.setUserEmail(privateId);
+            userContent.setUserEmail(importedId);
 
-            UserContentAdapter userContentAdapter = new UserContentAdapter(context,privateId);
-
-            Condition rangeKeyCondition = null;
-
-            boolean tableExists = userContentAdapter.isTableExists();
-
-            if(tableExists) {
+            UserContentAdapter userContentAdapter = new UserContentAdapter(context,importedId);
 
                 Long timestamp = null;
+
                 Cursor cursor =
                         userContentAdapter.fireRandomQuery("select max("+ UserContentAdapter.UPDATE_TIMESTAMP+") from <tableName>");
 
+                Condition rangeKeyCondition = null;
                 if(cursor == null) {
 
                     timestamp = new Date().getTime();
+                    rangeKeyCondition = new Condition()
+                            .withComparisonOperator(ComparisonOperator.LT.toString())
+                            .withAttributeValueList(new AttributeValue().withN("" + timestamp));
 
                 }else{
 
                     timestamp = cursor.getLong(0);
 
                     if(timestamp == null || timestamp == 0) {
+
                         timestamp = new Date().getTime();
+                        rangeKeyCondition = new Condition()
+                                .withComparisonOperator(ComparisonOperator.LT.toString())
+                                .withAttributeValueList(new AttributeValue().withN("" + timestamp));
+
+                    }else {
+
+                        rangeKeyCondition = new Condition()
+                                .withComparisonOperator(ComparisonOperator.GT.toString())
+                                .withAttributeValueList(new AttributeValue().withN("" + timestamp));
                     }
                 }
 
-                rangeKeyCondition = new Condition()
-                        .withComparisonOperator(ComparisonOperator.LT.toString())
-                        .withAttributeValueList(new AttributeValue().withN("" + timestamp));
-            } else {
-                Long timestamp = new Date().getTime();
-
-                rangeKeyCondition = new Condition()
-                        .withComparisonOperator(ComparisonOperator.LT.toString())
-                        .withAttributeValueList(new AttributeValue().withN("" + timestamp));
 
 
-            }
 
             DynamoDBQueryExpression queryExpression = new DynamoDBQueryExpression()
                     .withHashKeyValues(userContent)
@@ -265,15 +276,17 @@ public class ViewTable extends Fragment {
         @Override
         protected void onPostExecute(PaginatedQueryList<UserContent> userConnection) {
 
+            if(pd.isShowing())
+                pd.cancel();
+
+            if(mSwipeRefreshLayout != null && mSwipeRefreshLayout.isRefreshing()) {
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
 
             List<UserContent> userContents1 = new ArrayList<>();
             if(userConnection != null) {
 
-                UserContentAdapter userContentAdapter = new UserContentAdapter(context,privateId);
-
-                if(!userContentAdapter.isTableExists()) {
-                    userContentAdapter.createTable();
-                }
+                UserContentAdapter userContentAdapter = new UserContentAdapter(context,importedId);
 
                 for(UserContent userContent : userConnection) {
 

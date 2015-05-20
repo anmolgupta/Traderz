@@ -170,6 +170,10 @@ public class UserData {
         this.gender = gender;
     }
 
+    @DynamoDBIgnore
+    public String getFullName(){
+        return firstName + " "+ lastName;
+    }
 
 //    private int price;
 //    private String isbn;

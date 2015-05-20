@@ -1,0 +1,43 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+        <Button
+            android:id="@+id/add_row"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:text="Add Row"
+            android:textAlignment="center"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Product Name"
+        android:id="@+id/product_name"/>
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText2"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:text="Product Description" android:id="@+id/product_description"/>
+    <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
+              android:id="@+id/editText3"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:text="Quantity" android:id="@+id/quantity"/>
+    <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
+              android:id="@+id/editText4"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:text="Price" android:id="@+id/price"/>
+    <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
+              android:id="@+id/editText5"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:text="Units" android:id="@+id/units"/>
+    <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
+              android:id="@+id/editText6"/>
+
+
+</LinearLayout>

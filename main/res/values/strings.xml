@@ -23,16 +23,6 @@
         <item>Item 6</item>
     </string-array>
 
-    <string-array name="menus">
-        <item>Home</item>
-        <item>Android</item>
-        <item>Xamarin</item>
-        <item>WordPress</item>
-        <item>Java</item>
-        <item>Tools</item>
-        <item>Servlets</item>
-    </string-array>
-
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_social_auth">SocialAuth</string>
     <string name="drawer_open">Open drawer</string>
@@ -41,5 +31,6 @@
     <string name="title_activity_view_table">ViewTable</string>
     <string name="title_activity_loading_data_test">LoadingDataTest</string>
     <string name="title_activity_edit_text">EditTextActivity</string>
+    <string name="title_activity_dummy_add_row">DummyAddRowActivity</string>
 
 </resources>

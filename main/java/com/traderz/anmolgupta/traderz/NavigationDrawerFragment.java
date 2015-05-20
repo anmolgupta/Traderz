@@ -25,14 +25,23 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.amazonaws.com.google.gson.Gson;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBQueryExpression;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedQueryList;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
+import com.amazonaws.services.dynamodbv2.model.Condition;
+import com.traderz.anmolgupta.Content.UserContent;
 import com.traderz.anmolgupta.DynamoDB.DynamoDBManager;
 import com.traderz.anmolgupta.userData.EmailMappingToFullName;
 import com.traderz.anmolgupta.userData.EmailMappingToFullNameConverter;
 import com.traderz.anmolgupta.userData.UserConnection;
+import com.traderz.anmolgupta.userData.UserData;
 import com.traderz.anmolgupta.utilities.GenericConverters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -74,16 +83,18 @@ public class NavigationDrawerFragment extends Fragment {
     private List<String> options;
     private Context context;
 
-    private UserConnection userConn;
-
+    ArrayList<String> dummy;
+    Map<String,String> contactsMap;
     public NavigationDrawerFragment() {
 
     }
 
-    public void setOptions() {
+    public void setOptions(Map<String,String> map) {
 
-        ArrayList<String> dummy = new ArrayList<String>(options);
-        dummy.addAll(userConn.getContacts().getMap().keySet());
+        contactsMap = map;
+
+        dummy = new ArrayList<String>(options);
+        dummy.addAll(map.keySet());
 
         mDrawerListView.setAdapter(new ArrayAdapter<String>(
                 getActionBar().getThemedContext(),
@@ -92,12 +103,15 @@ public class NavigationDrawerFragment extends Fragment {
                 dummy));
     }
 
-    public String getValue( String key ) {
+    public  String getKey( int pos ) {
 
-        if(userConn != null)
-            return userConn.getContacts().getMap().get(key);
+        return dummy.get(pos);
 
-        return "";
+    }
+
+    public String getValue( int pos ){
+        String key = dummy.get(pos);
+        return contactsMap.get(key);
     }
 
     public int getStaticComponentCount() {
@@ -117,7 +131,9 @@ public class NavigationDrawerFragment extends Fragment {
         options = Arrays.asList(initial);
         // Read in the flag indicating whether or not the user has demonstrated awareness of the
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
+
         context = getActivity();
+
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mUserLearnedDrawer = sp.getBoolean(PREF_USER_LEARNED_DRAWER, false);
 
@@ -157,23 +173,8 @@ public class NavigationDrawerFragment extends Fragment {
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
                 options));
+
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
-
-        SharedPreferences settings = getActivity().getSharedPreferences("Traderz", 0);
-        String privateMap = settings.getString("userConnection", "");
-
-        if(privateMap ==null || privateMap.equals("")) {
-            new GetConnectionTask().execute(settings.getString("email",""));
-        }else {
-
-            EmailMappingToFullName emailMappingToFullName =
-                    new EmailMappingToFullName(
-                            GenericConverters.convertStringToObject(privateMap, Map.class));
-
-            userConn = new UserConnection(settings.getString("email",""),
-                    emailMappingToFullName);
-            setOptions();
-        }
 
         return mDrawerListView;
     }
@@ -365,38 +366,5 @@ public class NavigationDrawerFragment extends Fragment {
          * Called when an item in the navigation drawer is selected.
          */
         void onNavigationDrawerItemSelected( int position );
-    }
-
-    class GetConnectionTask extends AsyncTask<String, Void, UserConnection> {
-
-        @Override
-        protected UserConnection doInBackground( String... params ) {
-
-
-            UserConnection userConnection =
-                    DynamoDBManager.loadObject(new UserConnection(params[0]));
-
-            return userConnection;
-        }
-
-        @Override
-        protected void onPostExecute(UserConnection userConnection) {
-
-            if(userConnection != null) {
-
-                SharedPreferences settings = context.getSharedPreferences("Traderz", 0);
-
-                EmailMappingToFullNameConverter emailMappingToFullNameConverter =
-                        new EmailMappingToFullNameConverter();
-
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putString("userConnection",
-                        GenericConverters.convertObjectToString(userConnection.getContacts().getMap()));
-                editor.commit();
-
-                userConn = userConnection;
-                setOptions();
-            }
-        }
     }
 }

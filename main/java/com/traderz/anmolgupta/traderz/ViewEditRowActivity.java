@@ -2,6 +2,7 @@ package com.traderz.anmolgupta.traderz;
 
         import android.app.AlertDialog;
         import android.app.Dialog;
+        import android.app.ProgressDialog;
         import android.content.DialogInterface;
         import android.content.SharedPreferences;
         import android.os.AsyncTask;
@@ -53,6 +54,7 @@ public class ViewEditRowActivity extends Fragment {
 
     ListView listView;
     List<KeyValue> list;
+
     @Override
     public void onCreate( Bundle savedInstanceState ) {
 
@@ -78,7 +80,6 @@ public class ViewEditRowActivity extends Fragment {
               originalUser = true;
         else
             originalUser = false;
-
 
         new GetRow().execute();
 //        columnEntity = new LinkedHashMap<String,String>();

@@ -49,7 +49,10 @@ public class UserContentAdapter {
 
         mDbHelper = new DatabaseHelper(context);
 
-        this.tableName = getTableNameFromUserKey(tableName);;
+        this.tableName = getTableNameFromUserKey(tableName);
+
+        if(!isTableExists())
+            createTable();
     }
 
     public String getTableNameFromUserKey(String tableName) {

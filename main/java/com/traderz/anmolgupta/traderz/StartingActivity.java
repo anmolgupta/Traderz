@@ -7,6 +7,8 @@ import android.os.Bundle;
 import com.traderz.anmolgupta.DynamoDB.AmazonClientManager;
 import com.traderz.anmolgupta.userData.Social;
 
+import java.util.Map;
+
 /**
  * Created by anmolgupta on 03/04/15.
  */
@@ -26,7 +28,7 @@ public class StartingActivity extends Activity {
         if(userId.equals("")) {
             startActivity(new Intent(StartingActivity.this, SocialAuth.class));
         } else {
-            Intent intent = new Intent(StartingActivity.this, LoadingDataTest.class);
+            Intent intent = new Intent(StartingActivity.this, MainAdminNavigation.class);
             intent.putExtra("email", userId);
             startActivity(intent);
         }
