@@ -163,4 +163,23 @@ public class UserContent {
         return true;
     }
 
+    @Override
+    public boolean equals(Object other){
+
+        if(other == null )
+            return false;
+
+        if(other instanceof UserContent) {
+
+            UserContent userContent = (UserContent)other;
+
+            if(this.getUserEmail().equals(userContent.getUserEmail()) &&
+                    this.getId().equals(userContent.getId()))
+
+                return  true;
+
+        }
+        return false;
+    }
+
 }

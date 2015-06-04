@@ -134,8 +134,8 @@ public class UserContentAdapter {
 
         values.put(PRODUCT_NAME, map.remove(CustomFieldsEnum.PRODUCT_NAME.getName()));
         values.put(PRODUCT_DESCRIPTION, map.remove(CustomFieldsEnum.PRODUCT_DESCRIPTION.getName()));
-        values.put(QUANTITY, Double.parseDouble(map.remove(CustomFieldsEnum.QUANTITY.getName())));
-        values.put(PRICE,  Double.parseDouble(map.remove(CustomFieldsEnum.PRICE.getName())));
+        values.put(QUANTITY, GenericConverters.convertToDouble(map.remove(CustomFieldsEnum.QUANTITY.getName())));
+        values.put(PRICE,  GenericConverters.convertToDouble(map.remove(CustomFieldsEnum.PRICE.getName())));
         values.put(UNITS, map.remove(CustomFieldsEnum.UNITS.getName()));
 
         values.put(CUSTOM, GenericConverters.convertObjectToString(map));

@@ -30,8 +30,11 @@ import com.traderz.anmolgupta.SQLLiteClasses.UserContentAdapter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 public class ViewTable extends Fragment {
@@ -39,7 +42,7 @@ public class ViewTable extends Fragment {
     public static final String TITLE = "title";
     public static final String ID = "id";
     private ViewTableCallbacks mCallbacks;
-    private List<UserContent> userContents;
+    private Set<UserContent> userContents;
     private Context context;
     private ListView listView;
 
@@ -66,7 +69,7 @@ public class ViewTable extends Fragment {
 
         super.onCreate(savedInstanceState);
 
-        userContents = new ArrayList<UserContent>();
+        userContents = new LinkedHashSet<UserContent>();
 
         context = getActivity();
 
@@ -135,7 +138,7 @@ public class ViewTable extends Fragment {
         UserContentAdapter userContentAdapter = new UserContentAdapter(context, importedId);
 
             List<UserContent> userContentList = userContentAdapter.getUserContentByQuery("Select * from <tableName> order by "
-                    +UserContentAdapter.UPDATE_TIMESTAMP);
+                    +UserContentAdapter.UPDATE_TIMESTAMP + " desc" );
 
             if(userContentList.isEmpty()) {
                 pd.show();
@@ -158,7 +161,7 @@ public class ViewTable extends Fragment {
 
         listView.setAdapter(new MyAdapter(getActivity(),
                 android.R.layout.simple_list_item_1,
-                userContents));
+                new ArrayList<UserContent>(userContents)));
     }
 
     class MyAdapter extends ArrayAdapter<UserContent>{

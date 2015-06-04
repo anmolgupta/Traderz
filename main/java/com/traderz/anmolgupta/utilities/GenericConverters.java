@@ -39,4 +39,16 @@ public class GenericConverters {
 
         return null;
     }
+
+    public static double convertToDouble(String str) {
+
+        try{
+
+            return Double.parseDouble(str);
+
+        } catch(Exception e){
+
+            return 0;
+        }
+    }
 }
